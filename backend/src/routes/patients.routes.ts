@@ -11,6 +11,4 @@ router.get('/:id', patientsController.getById);
 router.get('/:id/expediente', patientsController.getExpediente);
 router.post('/', validate(createPatientSchema), patientsController.create);
 router.put('/:id', validate(updatePatientSchema), patientsController.update);
-router.patch('/:id/deactivate', patientsController.deactivate);
-router.patch('/:id/activate', patientsController.activate);
 export default router;

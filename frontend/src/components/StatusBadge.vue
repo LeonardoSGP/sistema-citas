@@ -13,7 +13,6 @@ const props = defineProps<{ status: AppointmentStatus | string }>()
 const badgeClass = computed(() => {
   const map: Record<string, string> = {
     'Programada': 'bg-blue-100 text-blue-700',
-    'Confirmada': 'bg-amber-100 text-amber-700',
     'Atendida': 'bg-green-100 text-green-700',
     'Cancelada': 'bg-red-100 text-red-700',
     'No asistió': 'bg-slate-100 text-slate-600',

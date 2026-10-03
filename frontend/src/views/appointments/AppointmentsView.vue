@@ -5,7 +5,6 @@
         <select v-model="filterEstado" class="input-field w-auto" @change="loadAppointments">
           <option value="">Todos los estados</option>
           <option value="Programada">Programada</option>
-          <option value="Confirmada">Confirmada</option>
           <option value="Atendida">Atendida</option>
           <option value="Cancelada">Cancelada</option>
           <option value="No asistió">No asistió</option>
@@ -67,6 +66,11 @@
                 <div class="flex gap-2">
                   <RouterLink :to="`/appointments/${appt.id}`" class="text-primary-600 hover:text-primary-700 text-sm">Ver</RouterLink>
                   <RouterLink :to="`/appointments/${appt.id}/edit`" class="text-slate-600 hover:text-slate-900 text-sm">Editar</RouterLink>
+                  <button
+                    v-if="appt.estado === 'Programada'"
+                    @click="openReschedule(appt)"
+                    class="text-amber-600 hover:text-amber-700 text-sm"
+                  >Re-programar</button>
                 </div>
               </td>
             </tr>
@@ -86,16 +90,56 @@
             <div class="flex gap-3 mt-3">
               <RouterLink :to="`/appointments/${appt.id}`" class="btn-secondary btn-sm text-xs">Ver</RouterLink>
               <RouterLink :to="`/appointments/${appt.id}/edit`" class="btn-secondary btn-sm text-xs">Editar</RouterLink>
+              <button
+                v-if="appt.estado === 'Programada'"
+                @click="openReschedule(appt)"
+                class="btn-sm text-xs text-amber-600"
+              >Re-programar</button>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Reschedule Modal -->
+    <Teleport to="body">
+      <div v-if="showRescheduleModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-4">Re-programar Cita</h3>
+          <p class="text-sm text-slate-600 mb-4">Paciente: <strong>{{ rescheduleAppt?.patient?.nombre }}</strong></p>
+          <div class="space-y-3">
+            <div>
+              <label class="label">Nueva fecha</label>
+              <input v-model="rescheduleForm.fecha" type="date" class="input-field" :min="todayStr" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="label">Hora inicio</label>
+                <input v-model="rescheduleForm.horaInicio" type="time" class="input-field" />
+              </div>
+              <div>
+                <label class="label">Hora fin</label>
+                <input v-model="rescheduleForm.horaFin" type="time" class="input-field" />
+              </div>
+            </div>
+          </div>
+          <div v-if="rescheduleError" class="bg-red-50 border border-red-200 rounded-lg p-3 mt-3">
+            <p class="text-red-700 text-sm">{{ rescheduleError }}</p>
+          </div>
+          <div class="flex gap-3 mt-4">
+            <button @click="closeReschedule" class="btn-secondary flex-1">Cancelar</button>
+            <button @click="submitReschedule" class="btn-primary flex-1" :disabled="rescheduleLoading">
+              {{ rescheduleLoading ? 'Guardando...' : 'Re-programar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { appointmentsService } from '../../services/appointments.service'
 import type { Appointment } from '../../types'
@@ -106,12 +150,67 @@ import { useFormatters } from '../../composables/useFormatters'
 import { useNotification } from '../../composables/useNotification'
 
 const { formatShortDate, formatTime } = useFormatters()
-const { error } = useNotification()
+const { success, error } = useNotification()
 const appointments = ref<Appointment[]>([])
 const loading = ref(true)
 const activeTab = ref('all')
 const filterEstado = ref('')
 const filterFecha = ref('')
+
+// Reschedule modal state
+const showRescheduleModal = ref(false)
+const rescheduleAppt = ref<Appointment | null>(null)
+const rescheduleLoading = ref(false)
+const rescheduleError = ref('')
+const rescheduleForm = ref({ fecha: '', horaInicio: '', horaFin: '' })
+
+const todayStr = computed(() => {
+  const d = new Date()
+  return d.toISOString().substring(0, 10)
+})
+
+function openReschedule(appt: Appointment) {
+  rescheduleAppt.value = appt
+  rescheduleForm.value = {
+    fecha: appt.fecha.substring(0, 10),
+    horaInicio: typeof appt.horaInicio === 'string' ? appt.horaInicio.substring(11, 16) : '',
+    horaFin: typeof appt.horaFin === 'string' ? appt.horaFin.substring(11, 16) : '',
+  }
+  rescheduleError.value = ''
+  showRescheduleModal.value = true
+}
+
+function closeReschedule() {
+  showRescheduleModal.value = false
+  rescheduleAppt.value = null
+}
+
+async function submitReschedule() {
+  if (!rescheduleAppt.value) return
+  if (!rescheduleForm.value.fecha || !rescheduleForm.value.horaInicio || !rescheduleForm.value.horaFin) {
+    rescheduleError.value = 'Todos los campos son obligatorios'
+    return
+  }
+  if (rescheduleForm.value.horaFin <= rescheduleForm.value.horaInicio) {
+    rescheduleError.value = 'La hora de fin debe ser posterior a la hora de inicio'
+    return
+  }
+  rescheduleLoading.value = true
+  rescheduleError.value = ''
+  try {
+    await appointmentsService.reschedule(rescheduleAppt.value.id, rescheduleForm.value)
+    success('Cita re-programada correctamente')
+    closeReschedule()
+    if (activeTab.value === 'today') await loadToday()
+    else if (activeTab.value === 'week') await loadWeek()
+    else await loadAppointments()
+  } catch (err: unknown) {
+    const e = err as { response?: { data?: { message?: string } } }
+    rescheduleError.value = e.response?.data?.message || 'Error al re-programar la cita'
+  } finally {
+    rescheduleLoading.value = false
+  }
+}
 
 async function loadAppointments() {
   activeTab.value = 'all'

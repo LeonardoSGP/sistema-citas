@@ -6,9 +6,13 @@ import { AuthRequest } from '../types';
 export const patientsController = {
   async getAll(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const { search, activo } = req.query;
-      const activoFilter = activo === 'true' ? true : activo === 'false' ? false : undefined;
-      const patients = await patientsService.getAll(search as string | undefined, activoFilter);
+      const { search, sexo, edadMin, edadMax } = req.query;
+      const patients = await patientsService.getAll({
+        search: search as string | undefined,
+        sexo: sexo as string | undefined,
+        edadMin: edadMin ? Number(edadMin) : undefined,
+        edadMax: edadMax ? Number(edadMax) : undefined,
+      });
       sendSuccess(res, patients);
     } catch (error) {
       sendError(res, (error as Error).message);
@@ -46,22 +50,6 @@ export const patientsController = {
     } catch (error) {
       const msg = (error as Error).message;
       sendError(res, msg, msg.includes('expediente') ? 409 : 500);
-    }
-  },
-  async deactivate(req: AuthRequest, res: Response): Promise<void> {
-    try {
-      await patientsService.deactivate(Number(req.params.id));
-      sendSuccess(res, null, 'Paciente desactivado');
-    } catch (error) {
-      sendError(res, (error as Error).message);
-    }
-  },
-  async activate(req: AuthRequest, res: Response): Promise<void> {
-    try {
-      await patientsService.activate(Number(req.params.id));
-      sendSuccess(res, null, 'Paciente activado');
-    } catch (error) {
-      sendError(res, (error as Error).message);
     }
   },
 };

@@ -31,6 +31,13 @@ export const appointmentsController = {
       sendError(res, (error as Error).message);
     }
   },
+  async getMonth(_req: AuthRequest, res: Response): Promise<void> {
+    try {
+      sendSuccess(res, await appointmentsService.getMonth());
+    } catch (error) {
+      sendError(res, (error as Error).message);
+    }
+  },
   async getById(req: AuthRequest, res: Response): Promise<void> {
     try {
       sendSuccess(res, await appointmentsService.getById(Number(req.params.id)));
@@ -44,20 +51,46 @@ export const appointmentsController = {
       sendSuccess(res, appointment, 'Cita registrada correctamente', 201);
     } catch (error) {
       const msg = (error as Error).message;
-      sendError(res, msg, msg.includes('horario') ? 409 : 500);
+      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') ? 400 : 500;
+      sendError(res, msg, status);
     }
   },
   async update(req: AuthRequest, res: Response): Promise<void> {
     try {
       sendSuccess(res, await appointmentsService.update(Number(req.params.id), req.body), 'Cita actualizada');
     } catch (error) {
-      sendError(res, (error as Error).message);
+      const msg = (error as Error).message;
+      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') ? 400 : 500;
+      sendError(res, msg, status);
+    }
+  },
+  async reschedule(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const appointment = await appointmentsService.reschedule(Number(req.params.id), req.body);
+      sendSuccess(res, appointment, 'Cita re-programada correctamente');
+    } catch (error) {
+      const msg = (error as Error).message;
+      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') ? 400 : 500;
+      sendError(res, msg, status);
     }
   },
   async changeStatus(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { estado } = req.body;
       sendSuccess(res, await appointmentsService.changeStatus(Number(req.params.id), estado), 'Estado actualizado');
+    } catch (error) {
+      sendError(res, (error as Error).message);
+    }
+  },
+  async getStats(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const period = (req.query.period as string) || 'week';
+      if (period !== 'week' && period !== 'month') {
+        sendError(res, 'El período debe ser "week" o "month"', 400);
+        return;
+      }
+      const stats = await appointmentsService.getStats(period);
+      sendSuccess(res, stats);
     } catch (error) {
       sendError(res, (error as Error).message);
     }

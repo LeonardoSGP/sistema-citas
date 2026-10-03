@@ -4,12 +4,13 @@ import type { ApiResponse, Patient } from '../types'
 export interface CreatePatientData {
   expediente: string
   nombre: string
+  telefono: string
   edad: number
   sexo: string
 }
 
 export const patientsService = {
-  async getAll(params?: { search?: string; activo?: boolean }) {
+  async getAll(params?: { search?: string; sexo?: string; edadMin?: number; edadMax?: number }) {
     const response = await api.get<ApiResponse<Patient[]>>('/api/patients', { params })
     return response.data
   },
@@ -27,14 +28,6 @@ export const patientsService = {
   },
   async update(id: number, data: Partial<CreatePatientData>) {
     const response = await api.put<ApiResponse<Patient>>(`/api/patients/${id}`, data)
-    return response.data
-  },
-  async deactivate(id: number) {
-    const response = await api.patch<ApiResponse<Patient>>(`/api/patients/${id}/deactivate`)
-    return response.data
-  },
-  async activate(id: number) {
-    const response = await api.patch<ApiResponse<Patient>>(`/api/patients/${id}/activate`)
     return response.data
   },
 }

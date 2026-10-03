@@ -1,13 +1,19 @@
 import prisma from '../config/database';
 
 export const patientsService = {
-  async getAll(search?: string, activo?: boolean) {
+  async getAll(filters?: { search?: string; sexo?: string; edadMin?: number; edadMax?: number }) {
     const where: Record<string, unknown> = {};
-    if (activo !== undefined) where.activo = activo;
-    if (search) {
+    if (filters?.sexo) where.sexo = filters.sexo;
+    if (filters?.edadMin !== undefined || filters?.edadMax !== undefined) {
+      where.edad = {};
+      if (filters?.edadMin !== undefined) (where.edad as Record<string, unknown>).gte = filters.edadMin;
+      if (filters?.edadMax !== undefined) (where.edad as Record<string, unknown>).lte = filters.edadMax;
+    }
+    if (filters?.search) {
       where.OR = [
-        { nombre: { contains: search } },
-        { expediente: { contains: search } },
+        { nombre: { contains: filters.search } },
+        { expediente: { contains: filters.search } },
+        { telefono: { contains: filters.search } },
       ];
     }
     return prisma.patient.findMany({
@@ -34,13 +40,13 @@ export const patientsService = {
     return patient;
   },
 
-  async create(data: { expediente: string; nombre: string; edad: number; sexo: string }) {
+  async create(data: { expediente: string; nombre: string; telefono: string; edad: number; sexo: string }) {
     const existing = await prisma.patient.findUnique({ where: { expediente: data.expediente } });
     if (existing) throw new Error('Ya existe un paciente con ese número de expediente');
     return prisma.patient.create({ data });
   },
 
-  async update(id: number, data: Partial<{ expediente: string; nombre: string; edad: number; sexo: string; activo: boolean }>) {
+  async update(id: number, data: Partial<{ expediente: string; nombre: string; telefono: string; edad: number; sexo: string }>) {
     if (data.expediente) {
       const existing = await prisma.patient.findFirst({
         where: { expediente: data.expediente, NOT: { id } },
@@ -50,11 +56,7 @@ export const patientsService = {
     return prisma.patient.update({ where: { id }, data });
   },
 
-  async deactivate(id: number) {
-    return prisma.patient.update({ where: { id }, data: { activo: false } });
-  },
-
-  async activate(id: number) {
-    return prisma.patient.update({ where: { id }, data: { activo: true } });
+  async getCount() {
+    return prisma.patient.count();
   },
 };

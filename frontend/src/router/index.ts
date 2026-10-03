@@ -28,6 +28,7 @@ const router = createRouter({
         { path: 'session-notes', name: 'SessionNotes', component: () => import('../views/sessionNotes/SessionNotesView.vue') },
         { path: 'session-notes/new', name: 'NewSessionNote', component: () => import('../views/sessionNotes/SessionNoteFormView.vue') },
         { path: 'session-notes/:id/edit', name: 'EditSessionNote', component: () => import('../views/sessionNotes/SessionNoteFormView.vue') },
+        { path: 'stats', name: 'Stats', component: () => import('../views/stats/StatsView.vue') },
         { path: 'settings', name: 'Settings', component: () => import('../views/SettingsView.vue') },
       ],
     },

@@ -6,7 +6,7 @@ export const createAppointmentSchema = z.object({
   horaInicio: z.string().min(1, 'La hora de inicio es obligatoria'),
   horaFin: z.string().min(1, 'La hora de fin es obligatoria'),
   estado: z
-    .enum(['Programada', 'Confirmada', 'Atendida', 'Cancelada', 'No asistió'])
+    .enum(['Programada', 'Atendida', 'Cancelada', 'No asistió'])
     .optional()
     .default('Programada'),
   motivo: z.string().optional(),
@@ -18,7 +18,7 @@ export const updateAppointmentSchema = z.object({
   fecha: z.string().optional(),
   horaInicio: z.string().optional(),
   horaFin: z.string().optional(),
-  estado: z.enum(['Programada', 'Confirmada', 'Atendida', 'Cancelada', 'No asistió']).optional(),
+  estado: z.enum(['Programada', 'Atendida', 'Cancelada', 'No asistió']).optional(),
   motivo: z.string().optional(),
   observaciones: z.string().optional(),
 });

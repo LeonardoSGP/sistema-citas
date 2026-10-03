@@ -8,6 +8,7 @@ export interface Patient {
   id: number
   expediente: string
   nombre: string
+  telefono: string
   edad: number
   sexo: string
   activo: boolean
@@ -32,7 +33,7 @@ export interface Appointment {
   updatedAt: string
 }
 
-export type AppointmentStatus = 'Programada' | 'Confirmada' | 'Atendida' | 'Cancelada' | 'No asistió'
+export type AppointmentStatus = 'Programada' | 'Atendida' | 'Cancelada' | 'No asistió'
 
 export interface SessionNote {
   id: number
@@ -54,4 +55,24 @@ export interface ApiResponse<T> {
   message: string
   data: T
   errors?: Array<{ field: string; message: string }>
+}
+
+export interface PatientStats {
+  period: string
+  startDate: string
+  endDate: string
+  totalAppointments: number
+  totalPatients: number
+  gender: {
+    hombres: number
+    mujeres: number
+    otros: number
+  }
+  ageRanges: {
+    '0-5': { total: number; hombres: number; mujeres: number }
+    '6-11': { total: number; hombres: number; mujeres: number }
+    '12-17': { total: number; hombres: number; mujeres: number }
+    '18-59': { total: number; hombres: number; mujeres: number }
+    '60+': { total: number; hombres: number; mujeres: number }
+  }
 }

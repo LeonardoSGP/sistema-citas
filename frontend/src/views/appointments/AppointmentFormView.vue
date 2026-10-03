@@ -22,7 +22,7 @@
 
         <div>
           <label class="label">Fecha *</label>
-          <input v-model="form.fecha" type="date" class="input-field" :class="{'border-red-500': errors.fecha}" />
+          <input v-model="form.fecha" type="date" class="input-field" :class="{'border-red-500': errors.fecha}" :min="todayStr" />
           <p v-if="errors.fecha" class="text-red-600 text-xs mt-1">{{ errors.fecha }}</p>
         </div>
 
@@ -43,7 +43,6 @@
           <label class="label">Estado</label>
           <select v-model="form.estado" class="input-field">
             <option value="Programada">Programada</option>
-            <option value="Confirmada">Confirmada</option>
             <option value="Atendida">Atendida</option>
             <option value="Cancelada">Cancelada</option>
             <option value="No asistió">No asistió</option>
@@ -92,6 +91,11 @@ const loading = ref(false)
 const serverError = ref('')
 const patients = ref<Patient[]>([])
 
+const todayStr = computed(() => {
+  const d = new Date()
+  return d.toISOString().substring(0, 10)
+})
+
 const form = reactive({
   patientId: 0,
   fecha: '',
@@ -117,7 +121,16 @@ function validate() {
   errors.horaFin = ''
 
   if (!form.patientId) { errors.patientId = 'El paciente es obligatorio'; valid = false }
-  if (!form.fecha) { errors.fecha = 'La fecha es obligatoria'; valid = false }
+  if (!form.fecha) {
+    errors.fecha = 'La fecha es obligatoria'; valid = false
+  } else {
+    const selectedDate = new Date(form.fecha + 'T00:00:00')
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    if (selectedDate < today) {
+      errors.fecha = 'No se pueden agendar citas en fechas pasadas'; valid = false
+    }
+  }
   if (!form.horaInicio) { errors.horaInicio = 'La hora de inicio es obligatoria'; valid = false }
   if (!form.horaFin) { errors.horaFin = 'La hora de fin es obligatoria'; valid = false }
   if (form.horaInicio && form.horaFin && form.horaFin <= form.horaInicio) {
@@ -151,7 +164,7 @@ async function handleSubmit() {
 
 onMounted(async () => {
   try {
-    const pResponse = await patientsService.getAll({ activo: true })
+    const pResponse = await patientsService.getAll()
     patients.value = pResponse.data
 
     // Pre-select patient if passed via query

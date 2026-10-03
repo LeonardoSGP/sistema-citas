@@ -12,9 +12,10 @@
     <div class="card">
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
-          <label class="label">Número de Expediente *</label>
+          <label class="label">Número de Expediente * (4 dígitos)</label>
           <input v-model="form.expediente" type="text" class="input-field"
-            :class="{ 'border-red-500': errors.expediente }" placeholder="EXP-001" />
+            :class="{ 'border-red-500': errors.expediente }" placeholder="0001"
+            maxlength="4" @input="onExpedienteInput" />
           <p v-if="errors.expediente" class="text-red-600 text-xs mt-1">{{ errors.expediente }}</p>
         </div>
 
@@ -23,6 +24,14 @@
           <input v-model="form.nombre" type="text" class="input-field"
             :class="{ 'border-red-500': errors.nombre }" placeholder="Nombre del paciente" />
           <p v-if="errors.nombre" class="text-red-600 text-xs mt-1">{{ errors.nombre }}</p>
+        </div>
+
+        <div>
+          <label class="label">Teléfono * (10 dígitos)</label>
+          <input v-model="form.telefono" type="tel" class="input-field"
+            :class="{ 'border-red-500': errors.telefono }" placeholder="5512345678"
+            maxlength="10" @input="onTelefonoInput" />
+          <p v-if="errors.telefono" class="text-red-600 text-xs mt-1">{{ errors.telefono }}</p>
         </div>
 
         <div>
@@ -72,18 +81,38 @@ const isEdit = computed(() => !!route.params.id)
 const loading = ref(false)
 const serverError = ref('')
 
-const form = reactive({ expediente: '', nombre: '', edad: 0, sexo: '' })
-const errors = reactive({ expediente: '', nombre: '', edad: '', sexo: '' })
+const form = reactive({ expediente: '', nombre: '', telefono: '', edad: 0, sexo: '' })
+const errors = reactive({ expediente: '', nombre: '', telefono: '', edad: '', sexo: '' })
+
+function onExpedienteInput(e: Event) {
+  const input = e.target as HTMLInputElement
+  form.expediente = input.value.replace(/\D/g, '').slice(0, 4)
+}
+
+function onTelefonoInput(e: Event) {
+  const input = e.target as HTMLInputElement
+  form.telefono = input.value.replace(/\D/g, '').slice(0, 10)
+}
 
 function validate() {
   let valid = true
   errors.expediente = ''
   errors.nombre = ''
+  errors.telefono = ''
   errors.edad = ''
   errors.sexo = ''
 
-  if (!form.expediente.trim()) { errors.expediente = 'El número de expediente es obligatorio'; valid = false }
+  if (!form.expediente.trim()) {
+    errors.expediente = 'El número de expediente es obligatorio'; valid = false
+  } else if (!/^\d{4}$/.test(form.expediente)) {
+    errors.expediente = 'El expediente debe ser exactamente 4 dígitos numéricos'; valid = false
+  }
   if (!form.nombre.trim()) { errors.nombre = 'El nombre es obligatorio'; valid = false }
+  if (!form.telefono.trim()) {
+    errors.telefono = 'El teléfono es obligatorio'; valid = false
+  } else if (!/^\d{10}$/.test(form.telefono)) {
+    errors.telefono = 'El teléfono debe tener exactamente 10 dígitos numéricos'; valid = false
+  }
   if (form.edad < 0 || form.edad > 150) { errors.edad = 'La edad debe ser entre 0 y 150'; valid = false }
   if (!form.sexo) { errors.sexo = 'El sexo es obligatorio'; valid = false }
   return valid
@@ -118,6 +147,7 @@ onMounted(async () => {
       Object.assign(form, {
         expediente: response.data.expediente,
         nombre: response.data.nombre,
+        telefono: response.data.telefono,
         edad: response.data.edad,
         sexo: response.data.sexo,
       })
