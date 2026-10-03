@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nombre    String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Patient {
+  id           Int            @id @default(autoincrement())
+  expediente   String         @unique @db.VarChar(50)
+  nombre       String         @db.VarChar(255)
+  edad         Int
+  sexo         String         @db.VarChar(20)
+  activo       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  appointments Appointment[]
+  sessionNotes SessionNote[]
+}
+
+model Appointment {
+  id            Int           @id @default(autoincrement())
+  patientId     Int
+  fecha         DateTime      @db.Date
+  horaInicio    DateTime      @db.Time
+  horaFin       DateTime      @db.Time
+  estado        String        @default("Programada") @db.VarChar(50)
+  motivo        String?       @db.Text
+  observaciones String?       @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  patient       Patient       @relation(fields: [patientId], references: [id])
+  sessionNotes  SessionNote[]
+
+  @@index([patientId])
+  @@index([fecha])
+}
+
+model SessionNote {
+  id            Int          @id @default(autoincrement())
+  patientId     Int
+  appointmentId Int?
+  fecha         DateTime     @db.Date
+  motivo        String?      @db.Text
+  notas         String?      @db.Text
+  observaciones String?      @db.Text
+  seguimiento   String?      @db.Text
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  patient       Patient      @relation(fields: [patientId], references: [id])
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+
+  @@index([patientId])
+  @@index([appointmentId])
+}
