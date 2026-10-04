@@ -9,7 +9,7 @@
     class="fixed top-0 left-0 h-full bg-white text-slate-700 border-r border-slate-200 z-30 flex flex-col transition-[width,transform] duration-300 overflow-hidden"
     :class="[
       isOpen || !isMobile ? 'translate-x-0' : '-translate-x-full',
-      isExpanded ? 'w-64' : 'w-16',
+      isMobile || isExpanded ? 'w-64' : 'w-16',
     ]"
     @mouseenter="!isMobile && $emit('hoverChange', true)"
     @mouseleave="!isMobile && $emit('hoverChange', false)"
