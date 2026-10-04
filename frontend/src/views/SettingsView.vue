@@ -15,15 +15,6 @@
     </div>
 
     <div class="card">
-      <h3 class="font-semibold text-slate-900 mb-4">Acerca del sistema</h3>
-      <div class="space-y-2 text-sm text-slate-600">
-        <p><span class="font-medium">Sistema:</span> Consulta Psicológica</p>
-        <p><span class="font-medium">Versión:</span> 1.0.0</p>
-        <p><span class="font-medium">Desarrollado con:</span> Vue 3, TypeScript, Node.js, MySQL</p>
-      </div>
-    </div>
-
-    <div class="card">
       <h3 class="font-semibold text-slate-900 mb-2">Sesión</h3>
       <p class="text-sm text-slate-500 mb-4">Cierra tu sesión actual de forma segura.</p>
       <button @click="handleLogout" class="btn-danger">

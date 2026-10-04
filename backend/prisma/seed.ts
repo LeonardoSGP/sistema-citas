@@ -16,8 +16,8 @@ async function main() {
   const hashedPassword = await bcrypt.hash('Demo1234!', 10);
   const user = await prisma.user.create({
     data: {
-      nombre: 'Dra. Laura Mendoza',
-      email: 'laura@psicologia.dev',
+      nombre: 'Lic. Jessica Ortiz',
+      email: 'jessica@psicologia.dev',
       password: hashedPassword,
     },
   });
@@ -25,11 +25,14 @@ async function main() {
 
   // Create patients
   const patientsData = [
-    { expediente: 'EXP-001', nombre: 'Ana García López', edad: 28, sexo: 'Femenino' },
-    { expediente: 'EXP-002', nombre: 'Carlos Martínez Ruiz', edad: 35, sexo: 'Masculino' },
-    { expediente: 'EXP-003', nombre: 'María Torres Vega', edad: 22, sexo: 'Femenino' },
-    { expediente: 'EXP-004', nombre: 'Roberto Sánchez Pérez', edad: 45, sexo: 'Masculino' },
-    { expediente: 'EXP-005', nombre: 'Sofía Ramírez Luna', edad: 30, sexo: 'Femenino' },
+    { expediente: '0001', nombre: 'Ana García López', telefono: '5512345678', edad: 28, sexo: 'Femenino' },
+    { expediente: '0002', nombre: 'Carlos Martínez Ruiz', telefono: '5598765432', edad: 35, sexo: 'Masculino' },
+    { expediente: '0003', nombre: 'María Torres Vega', telefono: '5511223344', edad: 22, sexo: 'Femenino' },
+    { expediente: '0004', nombre: 'Roberto Sánchez Pérez', telefono: '5544332211', edad: 45, sexo: 'Masculino' },
+    { expediente: '0005', nombre: 'Sofía Ramírez Luna', telefono: '5566778899', edad: 30, sexo: 'Femenino' },
+    { expediente: '0006', nombre: 'Mateo Herrera', telefono: '5599887766', edad: 9, sexo: 'Masculino' },
+    { expediente: '0007', nombre: 'Valentina Soto', telefono: '5500112233', edad: 16, sexo: 'Femenino' },
+    { expediente: '0008', nombre: 'Javier Domínguez', telefono: '5533221100', edad: 65, sexo: 'Masculino' },
   ];
 
   const patients = [];
@@ -42,13 +45,16 @@ async function main() {
   // Create appointments
   const appointmentsData = [
     { patientId: patients[0].id, fecha: new Date('2026-10-05'), horaInicio: new Date('1970-01-01T09:00:00.000Z'), horaFin: new Date('1970-01-01T10:00:00.000Z'), estado: 'Programada' },
-    { patientId: patients[1].id, fecha: new Date('2026-10-06'), horaInicio: new Date('1970-01-01T10:30:00.000Z'), horaFin: new Date('1970-01-01T11:30:00.000Z'), estado: 'Confirmada' },
+    { patientId: patients[1].id, fecha: new Date('2026-10-06'), horaInicio: new Date('1970-01-01T10:30:00.000Z'), horaFin: new Date('1970-01-01T11:30:00.000Z'), estado: 'Programada' },
     { patientId: patients[2].id, fecha: new Date('2026-10-02'), horaInicio: new Date('1970-01-01T16:00:00.000Z'), horaFin: new Date('1970-01-01T17:00:00.000Z'), estado: 'Atendida' },
     { patientId: patients[3].id, fecha: new Date('2026-10-10'), horaInicio: new Date('1970-01-01T12:00:00.000Z'), horaFin: new Date('1970-01-01T13:00:00.000Z'), estado: 'Programada' },
     { patientId: patients[4].id, fecha: new Date('2026-10-15'), horaInicio: new Date('1970-01-01T09:00:00.000Z'), horaFin: new Date('1970-01-01T10:00:00.000Z'), estado: 'Programada' },
-    { patientId: patients[0].id, fecha: new Date('2026-10-20'), horaInicio: new Date('1970-01-01T10:00:00.000Z'), horaFin: new Date('1970-01-01T11:00:00.000Z'), estado: 'Confirmada' },
+    { patientId: patients[0].id, fecha: new Date('2026-10-20'), horaInicio: new Date('1970-01-01T10:00:00.000Z'), horaFin: new Date('1970-01-01T11:00:00.000Z'), estado: 'Programada' },
     { patientId: patients[1].id, fecha: new Date('2026-10-01'), horaInicio: new Date('1970-01-01T11:00:00.000Z'), horaFin: new Date('1970-01-01T12:00:00.000Z'), estado: 'Atendida' },
     { patientId: patients[2].id, fecha: new Date('2026-11-05'), horaInicio: new Date('1970-01-01T15:00:00.000Z'), horaFin: new Date('1970-01-01T16:00:00.000Z'), estado: 'Programada' },
+    { patientId: patients[5].id, fecha: new Date('2026-10-03'), horaInicio: new Date('1970-01-01T10:00:00.000Z'), horaFin: new Date('1970-01-01T11:00:00.000Z'), estado: 'Atendida' },
+    { patientId: patients[6].id, fecha: new Date('2026-10-04'), horaInicio: new Date('1970-01-01T16:00:00.000Z'), horaFin: new Date('1970-01-01T17:00:00.000Z'), estado: 'Atendida' },
+    { patientId: patients[7].id, fecha: new Date('2026-10-04'), horaInicio: new Date('1970-01-01T17:30:00.000Z'), horaFin: new Date('1970-01-01T18:30:00.000Z'), estado: 'Atendida' },
   ];
 
   const appointments = [];

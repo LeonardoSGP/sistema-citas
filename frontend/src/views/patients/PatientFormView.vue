@@ -12,38 +12,38 @@
     <div class="card">
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
-          <label class="label">Número de Expediente * (4 dígitos)</label>
+          <label class="label">Número de Expediente</label>
           <input v-model="form.expediente" type="text" class="input-field"
-            :class="{ 'border-red-500': errors.expediente }" placeholder="0001"
+            :class="{ 'border-red-500 ring-4 ring-red-50': errors.expediente }" placeholder="0001"
             maxlength="4" @input="onExpedienteInput" />
-          <p v-if="errors.expediente" class="text-red-600 text-xs mt-1">{{ errors.expediente }}</p>
+          <p v-if="errors.expediente" class="text-red-500 text-xs mt-1">{{ errors.expediente }}</p>
         </div>
 
         <div>
-          <label class="label">Nombre completo *</label>
+          <label class="label">Nombre completo</label>
           <input v-model="form.nombre" type="text" class="input-field"
-            :class="{ 'border-red-500': errors.nombre }" placeholder="Nombre del paciente" />
-          <p v-if="errors.nombre" class="text-red-600 text-xs mt-1">{{ errors.nombre }}</p>
+            :class="{ 'border-red-500 ring-4 ring-red-50': errors.nombre }" placeholder="Nombre del paciente" />
+          <p v-if="errors.nombre" class="text-red-500 text-xs mt-1">{{ errors.nombre }}</p>
         </div>
 
         <div>
-          <label class="label">Teléfono * (10 dígitos)</label>
+          <label class="label">Teléfono</label>
           <input v-model="form.telefono" type="tel" class="input-field"
-            :class="{ 'border-red-500': errors.telefono }" placeholder="5512345678"
+            :class="{ 'border-red-500 ring-4 ring-red-50': errors.telefono }" placeholder="5512345678"
             maxlength="10" @input="onTelefonoInput" />
-          <p v-if="errors.telefono" class="text-red-600 text-xs mt-1">{{ errors.telefono }}</p>
+          <p v-if="errors.telefono" class="text-red-500 text-xs mt-1">{{ errors.telefono }}</p>
         </div>
 
         <div>
-          <label class="label">Edad *</label>
+          <label class="label">Edad</label>
           <input v-model.number="form.edad" type="number" min="0" max="150" class="input-field"
-            :class="{ 'border-red-500': errors.edad }" placeholder="25" />
-          <p v-if="errors.edad" class="text-red-600 text-xs mt-1">{{ errors.edad }}</p>
+            :class="{ 'border-red-500 ring-4 ring-red-50': errors.edad }" placeholder="25" />
+          <p v-if="errors.edad" class="text-red-500 text-xs mt-1">{{ errors.edad }}</p>
         </div>
 
         <div>
-          <label class="label">Sexo *</label>
-          <select v-model="form.sexo" class="input-field" :class="{ 'border-red-500': errors.sexo }">
+          <label class="label">Sexo</label>
+          <select v-model="form.sexo" class="input-field" :class="{ 'border-red-500 ring-4 ring-red-50': errors.sexo }">
             <option value="">Seleccionar...</option>
             <option value="Femenino">Femenino</option>
             <option value="Masculino">Masculino</option>

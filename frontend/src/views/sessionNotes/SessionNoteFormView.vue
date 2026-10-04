@@ -12,12 +12,12 @@
     <div class="card">
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
-          <label class="label">Paciente *</label>
-          <select v-model.number="form.patientId" class="input-field" @change="loadPatientAppointments">
+          <label class="label">Paciente</label>
+          <select v-model.number="form.patientId" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.patientId}" @change="loadPatientAppointments">
             <option :value="0">Seleccionar paciente...</option>
             <option v-for="p in patients" :key="p.id" :value="p.id">{{ p.nombre }} ({{ p.expediente }})</option>
           </select>
-          <p v-if="errors.patientId" class="text-red-600 text-xs mt-1">{{ errors.patientId }}</p>
+          <p v-if="errors.patientId" class="text-red-500 text-xs mt-1">{{ errors.patientId }}</p>
         </div>
 
         <div>
@@ -31,9 +31,9 @@
         </div>
 
         <div>
-          <label class="label">Fecha *</label>
-          <input v-model="form.fecha" type="date" class="input-field" :class="{'border-red-500': errors.fecha}" />
-          <p v-if="errors.fecha" class="text-red-600 text-xs mt-1">{{ errors.fecha }}</p>
+          <label class="label">Fecha</label>
+          <input v-model="form.fecha" type="date" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.fecha}" />
+          <p v-if="errors.fecha" class="text-red-500 text-xs mt-1">{{ errors.fecha }}</p>
         </div>
 
         <div>

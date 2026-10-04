@@ -12,30 +12,30 @@
     <div class="card">
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div>
-          <label class="label">Paciente *</label>
-          <select v-model.number="form.patientId" class="input-field" :class="{'border-red-500': errors.patientId}">
+          <label class="label">Paciente</label>
+          <select v-model.number="form.patientId" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.patientId}">
             <option :value="0">Seleccionar paciente...</option>
             <option v-for="p in patients" :key="p.id" :value="p.id">{{ p.nombre }} ({{ p.expediente }})</option>
           </select>
-          <p v-if="errors.patientId" class="text-red-600 text-xs mt-1">{{ errors.patientId }}</p>
+          <p v-if="errors.patientId" class="text-red-500 text-xs mt-1">{{ errors.patientId }}</p>
         </div>
 
         <div>
-          <label class="label">Fecha *</label>
-          <input v-model="form.fecha" type="date" class="input-field" :class="{'border-red-500': errors.fecha}" :min="todayStr" />
-          <p v-if="errors.fecha" class="text-red-600 text-xs mt-1">{{ errors.fecha }}</p>
+          <label class="label">Fecha</label>
+          <input v-model="form.fecha" type="date" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.fecha}" :min="todayStr" />
+          <p v-if="errors.fecha" class="text-red-500 text-xs mt-1">{{ errors.fecha }}</p>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="label">Hora inicio *</label>
-            <input v-model="form.horaInicio" type="time" class="input-field" :class="{'border-red-500': errors.horaInicio}" />
-            <p v-if="errors.horaInicio" class="text-red-600 text-xs mt-1">{{ errors.horaInicio }}</p>
+            <label class="label">Hora inicio</label>
+            <input v-model="form.horaInicio" type="time" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaInicio}" />
+            <p v-if="errors.horaInicio" class="text-red-500 text-xs mt-1">{{ errors.horaInicio }}</p>
           </div>
           <div>
-            <label class="label">Hora fin *</label>
-            <input v-model="form.horaFin" type="time" class="input-field" :class="{'border-red-500': errors.horaFin}" />
-            <p v-if="errors.horaFin" class="text-red-600 text-xs mt-1">{{ errors.horaFin }}</p>
+            <label class="label">Hora fin</label>
+            <input v-model="form.horaFin" type="time" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaFin}" />
+            <p v-if="errors.horaFin" class="text-red-500 text-xs mt-1">{{ errors.horaFin }}</p>
           </div>
         </div>
 
