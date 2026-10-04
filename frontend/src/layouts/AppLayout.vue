@@ -1,7 +1,15 @@
 <template>
   <div class="min-h-screen bg-slate-50">
-    <AppSidebar :is-open="sidebarOpen" @close="sidebarOpen = false" />
-    <div class="lg:pl-64 flex flex-col min-h-screen">
+    <AppSidebar
+      :is-open="sidebarOpen"
+      :is-expanded="sidebarExpanded"
+      @close="sidebarOpen = false"
+      @hover-change="sidebarExpanded = $event"
+    />
+    <div
+      class="flex flex-col min-h-screen transition-[padding] duration-300"
+      :class="sidebarExpanded ? 'lg:pl-64' : 'lg:pl-16'"
+    >
       <AppNavbar @toggle-sidebar="sidebarOpen = !sidebarOpen" />
       <main class="flex-1 p-4 lg:p-6">
         <RouterView />
@@ -17,4 +25,5 @@ import AppSidebar from '../components/AppSidebar.vue'
 import AppNavbar from '../components/AppNavbar.vue'
 
 const sidebarOpen = ref(false)
+const sidebarExpanded = ref(false)
 </script>

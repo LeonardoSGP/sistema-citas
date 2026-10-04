@@ -6,18 +6,23 @@
 
   <!-- Sidebar -->
   <aside
-    class="fixed top-0 left-0 h-full w-64 bg-white text-slate-700 border-r border-slate-200 z-30 flex flex-col transition-transform duration-300"
-    :class="isOpen || !isMobile ? 'translate-x-0' : '-translate-x-full'"
+    class="fixed top-0 left-0 h-full bg-white text-slate-700 border-r border-slate-200 z-30 flex flex-col transition-[width,transform] duration-300 overflow-hidden"
+    :class="[
+      isOpen || !isMobile ? 'translate-x-0' : '-translate-x-full',
+      isExpanded ? 'w-64' : 'w-16',
+    ]"
+    @mouseenter="!isMobile && $emit('hoverChange', true)"
+    @mouseleave="!isMobile && $emit('hoverChange', false)"
   >
     <!-- Logo -->
-    <div class="p-6 border-b border-slate-100">
-      <div class="flex items-center gap-3">
+    <div class="p-4 border-b border-slate-100">
+      <div class="flex items-center gap-3 min-w-max">
         <div class="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
           <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
         </div>
-        <div>
+        <div class="transition-opacity duration-200" :class="isExpanded || isMobile ? 'opacity-100' : 'opacity-0'">
           <p class="font-semibold text-sm leading-tight text-slate-800">Consulta</p>
           <p class="font-semibold text-sm leading-tight text-primary-600">Psicológica</p>
         </div>
@@ -30,17 +35,19 @@
         v-for="item in navItems"
         :key="item.to"
         :to="item.to"
-        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors min-w-max"
         :class="isActive(item.to) ? 'bg-primary-50 text-primary-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'"
         @click="isMobile && $emit('close')"
       >
         <span class="w-5 h-5 flex-shrink-0" v-html="item.icon"></span>
-        {{ item.label }}
+        <span class="transition-opacity duration-200" :class="isExpanded || isMobile ? 'opacity-100' : 'opacity-0'">
+          {{ item.label }}
+        </span>
       </RouterLink>
     </nav>
 
     <!-- User info -->
-    <div class="p-4 border-t border-slate-100">
+    <div class="p-4 border-t border-slate-100 min-w-max transition-opacity duration-200" :class="isExpanded || isMobile ? 'opacity-100' : 'opacity-0'">
       <p class="text-xs text-slate-400">Sesión iniciada como</p>
       <p class="text-sm font-medium text-slate-700 truncate">{{ authStore.user?.nombre }}</p>
     </div>
@@ -52,8 +59,8 @@ import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
-const props = defineProps<{ isOpen: boolean }>()
-defineEmits<{ close: [] }>()
+defineProps<{ isOpen: boolean; isExpanded: boolean }>()
+defineEmits<{ close: []; hoverChange: [expanded: boolean] }>()
 
 const route = useRoute()
 const authStore = useAuthStore()

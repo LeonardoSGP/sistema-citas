@@ -95,7 +95,7 @@
             </div>
           </div>
         </div>
-        <RouterLink :to="{ path: '/appointments/new', query: { date: selectedDateStr } }" class="btn-primary w-full mt-4 justify-center">
+        <RouterLink :to="{ path: '/appointments/new', query: { date: selectedDateStr } }" class="btn-primary w-full mt-8 py-2 text-sm justify-center">
           Agendar cita
         </RouterLink>
       </div>
