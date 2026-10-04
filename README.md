@@ -196,8 +196,8 @@ npm run prisma:studio
 
 | Campo | Valor |
 |-------|-------|
-| Email | `laura@psicologia.dev` |
-| Contraseña | `Demo1234!` |
+| Email | `jessica@correo.com` |
+| Contraseña | `12345678` |
 
 ---
 

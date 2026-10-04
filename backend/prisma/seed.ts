@@ -13,11 +13,11 @@ async function main() {
   await prisma.user.deleteMany();
 
   // Create user
-  const hashedPassword = await bcrypt.hash('Demo1234!', 10);
+  const hashedPassword = await bcrypt.hash('12345678', 10);
   const user = await prisma.user.create({
     data: {
       nombre: 'Lic. Jessica Ortiz',
-      email: 'jessica@psicologia.dev',
+      email: 'jessica@correo.com',
       password: hashedPassword,
     },
   });
