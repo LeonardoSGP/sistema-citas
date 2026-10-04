@@ -24,4 +24,21 @@ export const authController = {
   async logout(_req: Request, res: Response): Promise<void> {
     sendSuccess(res, null, 'Sesión cerrada correctamente');
   },
+  async updateProfile(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      sendSuccess(res, await authService.updateProfile(req.userId!, req.body), 'Perfil actualizado correctamente');
+    } catch (error) {
+      const message = (error as Error).message;
+      sendError(res, message, message.includes('correo') ? 409 : 500);
+    }
+  },
+  async changePassword(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      await authService.changePassword(req.userId!, req.body.currentPassword, req.body.newPassword);
+      sendSuccess(res, null, 'Contraseña actualizada correctamente');
+    } catch (error) {
+      const message = (error as Error).message;
+      sendError(res, message, message.includes('incorrecta') ? 400 : 500);
+    }
+  },
 };

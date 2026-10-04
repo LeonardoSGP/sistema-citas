@@ -1,55 +1,58 @@
 <template>
-  <div class="space-y-6">
-    <h2 class="text-xl font-semibold text-slate-900">Bienvenida, {{ authStore.user?.nombre }}</h2>
+  <div class="space-y-6 rounded-[2rem] bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 p-4 sm:p-6">
+    <div class="rounded-[1.75rem] border border-rose-100 bg-rose-100/70 p-5 shadow-sm">
+      <h2 class="text-xl font-semibold text-primary-900">Bienvenida, {{ authStore.user?.nombre }}</h2>
+      <p class="mt-1 text-sm text-rose-700">Consulta el resumen de tus pacientes y citas.</p>
+    </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="card bg-primary-50 border-primary-100">
-        <p class="text-sm font-medium text-primary-800 mb-1">Pacientes registrados</p>
+      <div class="card border-rose-100 bg-fuchsia-50/80">
+        <p class="mb-1 text-sm font-medium text-rose-800">Pacientes registrados</p>
         <p class="text-3xl font-bold text-primary-900">{{ stats.totalPatients }}</p>
       </div>
-      <div class="card">
-        <p class="text-sm text-slate-500 mb-1">Citas hoy</p>
-        <p class="text-3xl font-bold text-primary-600">{{ stats.todayAppointments }}</p>
+      <div class="card border-rose-100 bg-fuchsia-50/80">
+        <p class="mb-1 text-sm text-rose-700">Citas hoy</p>
+        <p class="text-3xl font-bold text-primary-700">{{ stats.todayAppointments }}</p>
       </div>
-      <div class="card">
-        <p class="text-sm text-slate-500 mb-1">Citas esta semana</p>
-        <p class="text-3xl font-bold text-primary-600">{{ stats.weekAppointments }}</p>
+      <div class="card border-rose-100 bg-fuchsia-50/80">
+        <p class="mb-1 text-sm text-rose-700">Citas esta semana</p>
+        <p class="text-3xl font-bold text-primary-700">{{ stats.weekAppointments }}</p>
       </div>
-      <div class="card">
-        <p class="text-sm text-slate-500 mb-1">Próximas programadas</p>
-        <p class="text-3xl font-bold text-primary-600">{{ stats.upcomingAppointments }}</p>
+      <div class="card border-rose-100 bg-fuchsia-50/80">
+        <p class="mb-1 text-sm text-rose-700">Próximas programadas</p>
+        <p class="text-3xl font-bold text-primary-700">{{ stats.upcomingAppointments }}</p>
       </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Calendar -->
-      <div class="card lg:col-span-2">
+      <div class="card border-rose-100 bg-fuchsia-50/80 lg:col-span-2">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-slate-900">Calendario de Citas ({{ currentMonthName }})</h3>
+          <h3 class="font-semibold text-primary-900">Calendario de Citas ({{ currentMonthName }})</h3>
           <div class="flex gap-2">
-            <button @click="prevMonth" class="p-1 rounded hover:bg-slate-100 text-slate-600">&lt;</button>
-            <button @click="nextMonth" class="p-1 rounded hover:bg-slate-100 text-slate-600">&gt;</button>
+            <button @click="prevMonth" class="rounded-lg p-1 text-rose-600 hover:bg-rose-100 hover:text-primary-700">&lt;</button>
+            <button @click="nextMonth" class="rounded-lg p-1 text-rose-600 hover:bg-rose-100 hover:text-primary-700">&gt;</button>
           </div>
         </div>
         
-        <div class="grid grid-cols-7 gap-px bg-slate-200 border border-slate-200 rounded-lg overflow-hidden">
+        <div class="grid grid-cols-7 gap-px overflow-hidden rounded-lg border border-rose-200 bg-rose-200">
           <!-- Days of week -->
-          <div v-for="day in ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']" :key="day" class="bg-slate-50 py-2 text-center text-xs font-medium text-slate-500">
+          <div v-for="day in ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']" :key="day" class="bg-rose-100/80 py-2 text-center text-xs font-medium text-rose-700">
             {{ day }}
           </div>
           <!-- Days -->
           <div
             v-for="(day, idx) in calendarDays"
             :key="idx"
-            class="bg-white min-h-[80px] p-1 transition-colors hover:bg-slate-50 cursor-pointer"
+            class="min-h-[80px] cursor-pointer bg-rose-50/70 p-1 transition-colors hover:bg-rose-100"
             :class="[
-              !day.isCurrentMonth ? 'bg-slate-50/50 text-slate-400' : 'text-slate-700',
-              day.isToday ? 'ring-2 ring-inset ring-primary-500 bg-primary-50/10' : ''
+              !day.isCurrentMonth ? 'bg-rose-50/40 text-rose-300' : 'text-rose-900',
+              day.isToday ? 'ring-2 ring-inset ring-primary-500 bg-pink-100/70' : ''
             ]"
             @click="selectDate(day.date)"
           >
-            <p class="text-xs font-medium p-1" :class="day.isToday ? 'text-primary-700' : ''">{{ day.dayOfMonth }}</p>
+            <p class="p-1 text-xs font-medium" :class="day.isToday ? 'text-primary-700' : ''">{{ day.dayOfMonth }}</p>
             <div class="space-y-1 mt-1">
               <div
                 v-for="appt in day.appointments.slice(0, 3)"
@@ -60,7 +63,7 @@
               >
                 {{ formatTime(appt.horaInicio) }} {{ appt.patient?.nombre }}
               </div>
-              <div v-if="day.appointments.length > 3" class="text-[10px] text-slate-500 px-1 font-medium">
+              <div v-if="day.appointments.length > 3" class="px-1 text-[10px] font-medium text-rose-600">
                 +{{ day.appointments.length - 3 }} más
               </div>
             </div>
@@ -69,10 +72,10 @@
       </div>
 
       <!-- Today's appointments -->
-      <div class="card">
+      <div class="card border-rose-100 bg-fuchsia-50/80">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-slate-900">Citas del día</h3>
-          <p class="text-xs text-primary-600 font-medium">{{ selectedDateFormatted }}</p>
+          <h3 class="font-semibold text-primary-900">Citas del día</h3>
+          <p class="text-xs font-medium text-primary-700">{{ selectedDateFormatted }}</p>
         </div>
         <LoadingSpinner v-if="loadingMonth" />
         <EmptyState v-else-if="!selectedDateAppointments.length" title="Sin citas" description="No hay citas programadas para este día" />
@@ -80,14 +83,14 @@
           <div
             v-for="appt in selectedDateAppointments"
             :key="appt.id"
-            class="flex items-center gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+            class="flex cursor-pointer items-center gap-3 rounded-lg border border-rose-100 bg-rose-50/50 p-3 transition-colors hover:bg-rose-100/70"
             @click="router.push(`/appointments/${appt.id}`)"
           >
             <div class="w-14 text-center">
-              <p class="text-sm font-semibold text-primary-600">{{ formatTime(appt.horaInicio) }}</p>
+              <p class="text-sm font-semibold text-primary-700">{{ formatTime(appt.horaInicio) }}</p>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-slate-900 truncate">{{ appt.patient?.nombre }}</p>
+              <p class="truncate text-sm font-medium text-rose-950">{{ appt.patient?.nombre }}</p>
               <StatusBadge :status="appt.estado" class="mt-1" />
             </div>
           </div>
@@ -221,11 +224,10 @@ function nextMonth() {
 
 function getApptColorClass(status: string) {
   switch(status) {
-    case 'Programada': return 'bg-blue-100 text-blue-800'
-    case 'Atendida': return 'bg-green-100 text-green-800'
-    case 'Cancelada': return 'bg-red-100 text-red-800'
-    case 'No asistió': return 'bg-slate-200 text-slate-700'
-    default: return 'bg-slate-100 text-slate-600'
+    case 'Programada': return 'bg-pink-100 text-pink-800'
+    case 'Atendida': return 'bg-fuchsia-100 text-fuchsia-800'
+    case 'No asistió': return 'bg-rose-100 text-rose-800'
+    default: return 'bg-rose-50 text-rose-700'
   }
 }
 

@@ -1,9 +1,10 @@
 import prisma from '../config/database';
 
 export const patientsService = {
-  async getAll(filters?: { search?: string; sexo?: string; edadMin?: number; edadMax?: number }) {
+  buildWhere(filters?: { search?: string; sexo?: string; edadMin?: number; edadMax?: number; activo?: boolean }) {
     const where: Record<string, unknown> = {};
     if (filters?.sexo) where.sexo = filters.sexo;
+    if (filters?.activo !== undefined) where.activo = filters.activo;
     if (filters?.edadMin !== undefined || filters?.edadMax !== undefined) {
       where.edad = {};
       if (filters?.edadMin !== undefined) (where.edad as Record<string, unknown>).gte = filters.edadMin;
@@ -16,10 +17,39 @@ export const patientsService = {
         { telefono: { contains: filters.search } },
       ];
     }
+    return where;
+  },
+
+  async getAll(filters?: { search?: string; sexo?: string; edadMin?: number; edadMax?: number; activo?: boolean }) {
     return prisma.patient.findMany({
-      where,
+      where: this.buildWhere(filters),
       orderBy: { nombre: 'asc' },
     });
+  },
+
+  async getPaginated(
+    filters: { search?: string; sexo?: string; edadMin?: number; edadMax?: number; activo?: boolean },
+    page: number,
+    limit: number
+  ) {
+    const where = this.buildWhere(filters);
+    const [items, total] = await Promise.all([
+      prisma.patient.findMany({
+        where,
+        orderBy: { nombre: 'asc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.patient.count({ where }),
+    ]);
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   },
 
   async getById(id: number) {

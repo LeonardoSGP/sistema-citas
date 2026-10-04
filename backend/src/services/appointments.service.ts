@@ -72,7 +72,6 @@ export const appointmentsService = {
 
     const where: Record<string, unknown> = {
       fecha: { gte: dateObj, lt: nextDay },
-      estado: { not: 'Cancelada' },
       OR: [
         {
           horaInicio: { lt: endTime },
@@ -204,28 +203,29 @@ export const appointmentsService = {
   },
 
   async changeStatus(id: number, estado: string) {
-    const validStatuses = ['Programada', 'Atendida', 'Cancelada', 'No asistió'];
+    const validStatuses = ['Programada', 'Atendida', 'No asistió'];
     if (!validStatuses.includes(estado)) {
       throw new Error('Estado inválido');
     }
     return prisma.appointment.update({ where: { id }, data: { estado } });
   },
 
-  async getStats(period: 'week' | 'month') {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  async getStats(period: 'week' | 'month', referenceDate?: string) {
+    const selectedDate = referenceDate ? new Date(`${referenceDate}T00:00:00`) : new Date();
+    if (Number.isNaN(selectedDate.getTime())) throw new Error('Fecha de estadísticas inválida');
+    selectedDate.setHours(0, 0, 0, 0);
     let start: Date;
     let end: Date;
 
     if (period === 'week') {
-      const dayOfWeek = today.getDay();
-      start = new Date(today);
-      start.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+      const dayOfWeek = selectedDate.getDay();
+      start = new Date(selectedDate);
+      start.setDate(selectedDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
       end = new Date(start);
       end.setDate(start.getDate() + 7);
     } else {
-      start = new Date(today.getFullYear(), today.getMonth(), 1);
-      end = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      start = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      end = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
     }
 
     const appointments = await prisma.appointment.findMany({

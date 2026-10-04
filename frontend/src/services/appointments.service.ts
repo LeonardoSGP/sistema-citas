@@ -48,8 +48,8 @@ export const appointmentsService = {
     const response = await api.patch<ApiResponse<Appointment>>(`/api/appointments/${id}/status`, { estado })
     return response.data
   },
-  async getStats(period: 'week' | 'month') {
-    const response = await api.get<ApiResponse<PatientStats>>('/api/appointments/stats', { params: { period } })
+  async getStats(period: 'week' | 'month', referenceDate?: string) {
+    const response = await api.get<ApiResponse<PatientStats>>('/api/appointments/stats', { params: { period, referenceDate } })
     return response.data
   },
 }

@@ -33,7 +33,7 @@ export interface Appointment {
   updatedAt: string
 }
 
-export type AppointmentStatus = 'Programada' | 'Atendida' | 'Cancelada' | 'No asistió'
+export type AppointmentStatus = 'Programada' | 'Atendida' | 'No asistió'
 
 export interface SessionNote {
   id: number

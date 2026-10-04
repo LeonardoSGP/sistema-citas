@@ -30,6 +30,11 @@ export const useAuthStore = defineStore('auth', () => {
     } catch {
       logout()
     }
+
+  }
+
+  function setUser(updatedUser: User) {
+    user.value = updatedUser
   }
 
   function logout() {
@@ -38,5 +43,5 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('token')
   }
 
-  return { user, token, loading, isAuthenticated, login, fetchProfile, logout }
+  return { user, token, loading, isAuthenticated, login, fetchProfile, setUser, logout }
 })

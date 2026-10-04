@@ -85,11 +85,12 @@ export const appointmentsController = {
   async getStats(req: AuthRequest, res: Response): Promise<void> {
     try {
       const period = (req.query.period as string) || 'week';
+      const referenceDate = req.query.referenceDate as string | undefined;
       if (period !== 'week' && period !== 'month') {
         sendError(res, 'El período debe ser "week" o "month"', 400);
         return;
       }
-      const stats = await appointmentsService.getStats(period);
+      const stats = await appointmentsService.getStats(period, referenceDate);
       sendSuccess(res, stats);
     } catch (error) {
       sendError(res, (error as Error).message);

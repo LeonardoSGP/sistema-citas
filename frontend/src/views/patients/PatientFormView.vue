@@ -1,64 +1,69 @@
 <template>
-  <div class="max-w-lg">
-    <div class="flex items-center gap-3 mb-6">
-      <button @click="router.back()" class="p-2 rounded-lg hover:bg-slate-200">
+  <div class="max-w-4xl rounded-[2rem] bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 p-4 sm:p-6">
+    <div class="mb-6 flex items-center gap-3 rounded-[1.5rem] border border-rose-100 bg-rose-100/70 p-4 shadow-sm">
+      <button @click="router.back()" class="rounded-xl p-2 text-rose-700 transition hover:bg-rose-200/70 hover:text-primary-800">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
-      <h2 class="text-xl font-semibold text-slate-900">{{ isEdit ? 'Editar Paciente' : 'Nuevo Paciente' }}</h2>
+      <div>
+        <h2 class="text-xl font-semibold text-primary-900">{{ isEdit ? 'Editar Paciente' : 'Nuevo Paciente' }}</h2>
+        <p class="mt-1 text-sm text-rose-700">Registra la información principal del paciente.</p>
+      </div>
     </div>
 
-    <div class="card">
-      <form @submit.prevent="handleSubmit" class="space-y-4">
+    <div class="card border-rose-100 bg-fuchsia-50/80 shadow-[0_10px_35px_-12px_rgba(225,29,72,0.2)]">
+      <form @submit.prevent="handleSubmit" class="space-y-6">
+        <div class="grid gap-5 sm:grid-cols-2">
         <div>
-          <label class="label">Número de Expediente</label>
+          <label class="label text-rose-900">Número de Expediente</label>
           <input v-model="form.expediente" type="text" class="input-field"
             :class="{ 'border-red-500 ring-4 ring-red-50': errors.expediente }" placeholder="0001"
             maxlength="4" @input="onExpedienteInput" />
-          <p v-if="errors.expediente" class="text-red-500 text-xs mt-1">{{ errors.expediente }}</p>
+          <p v-if="errors.expediente" class="mt-1 text-xs text-red-500">{{ errors.expediente }}</p>
         </div>
 
         <div>
-          <label class="label">Nombre completo</label>
+          <label class="label text-rose-900">Nombre completo</label>
           <input v-model="form.nombre" type="text" class="input-field"
             :class="{ 'border-red-500 ring-4 ring-red-50': errors.nombre }" placeholder="Nombre del paciente" />
-          <p v-if="errors.nombre" class="text-red-500 text-xs mt-1">{{ errors.nombre }}</p>
+          <p v-if="errors.nombre" class="mt-1 text-xs text-red-500">{{ errors.nombre }}</p>
         </div>
 
         <div>
-          <label class="label">Teléfono</label>
+          <label class="label text-rose-900">Teléfono</label>
           <input v-model="form.telefono" type="tel" class="input-field"
             :class="{ 'border-red-500 ring-4 ring-red-50': errors.telefono }" placeholder="5512345678"
             maxlength="10" @input="onTelefonoInput" />
-          <p v-if="errors.telefono" class="text-red-500 text-xs mt-1">{{ errors.telefono }}</p>
+          <p v-if="errors.telefono" class="mt-1 text-xs text-red-500">{{ errors.telefono }}</p>
         </div>
 
         <div>
-          <label class="label">Edad</label>
+          <label class="label text-rose-900">Edad</label>
           <input v-model.number="form.edad" type="number" min="0" max="150" class="input-field"
             :class="{ 'border-red-500 ring-4 ring-red-50': errors.edad }" placeholder="25" />
-          <p v-if="errors.edad" class="text-red-500 text-xs mt-1">{{ errors.edad }}</p>
+          <p v-if="errors.edad" class="mt-1 text-xs text-red-500">{{ errors.edad }}</p>
         </div>
 
         <div>
-          <label class="label">Sexo</label>
+          <label class="label text-rose-900">Sexo</label>
           <select v-model="form.sexo" class="input-field" :class="{ 'border-red-500 ring-4 ring-red-50': errors.sexo }">
             <option value="">Seleccionar...</option>
             <option value="Femenino">Femenino</option>
             <option value="Masculino">Masculino</option>
             <option value="Otro">Otro</option>
           </select>
-          <p v-if="errors.sexo" class="text-red-600 text-xs mt-1">{{ errors.sexo }}</p>
+          <p v-if="errors.sexo" class="mt-1 text-xs text-red-600">{{ errors.sexo }}</p>
+        </div>
         </div>
 
-        <div v-if="serverError" class="bg-red-50 border border-red-200 rounded-lg p-3">
+        <div v-if="serverError" class="rounded-xl border border-red-200 bg-red-50 p-3">
           <p class="text-red-700 text-sm">{{ serverError }}</p>
         </div>
 
-        <div class="flex gap-3 pt-2">
-          <button type="button" @click="router.back()" class="btn-secondary flex-1">Cancelar</button>
-          <button type="submit" class="btn-primary flex-1" :disabled="loading">
+        <div class="flex flex-col-reverse justify-end gap-3 border-t border-rose-100 pt-5 sm:flex-row">
+          <button type="button" @click="router.back()" class="btn-secondary sm:min-w-32">Cancelar</button>
+          <button type="submit" class="btn-primary sm:min-w-40" :disabled="loading">
             {{ loading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Registrar') }}
           </button>
         </div>

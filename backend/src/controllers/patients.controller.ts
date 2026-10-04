@@ -6,13 +6,21 @@ import { AuthRequest } from '../types';
 export const patientsController = {
   async getAll(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const { search, sexo, edadMin, edadMax } = req.query;
-      const patients = await patientsService.getAll({
+      const { search, sexo, edadMin, edadMax, activo, page, limit } = req.query;
+      const filters = {
         search: search as string | undefined,
         sexo: sexo as string | undefined,
         edadMin: edadMin ? Number(edadMin) : undefined,
         edadMax: edadMax ? Number(edadMax) : undefined,
-      });
+        activo: activo === undefined ? undefined : activo === 'true',
+      };
+      const patients = page || limit
+        ? await patientsService.getPaginated(
+            filters,
+            Math.max(1, Number(page) || 1),
+            Math.min(50, Math.max(1, Number(limit) || 5))
+          )
+        : await patientsService.getAll(filters);
       sendSuccess(res, patients);
     } catch (error) {
       sendError(res, (error as Error).message);

@@ -9,9 +9,21 @@ export interface CreatePatientData {
   sexo: string
 }
 
+export interface PaginatedPatients {
+  items: Patient[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
 export const patientsService = {
-  async getAll(params?: { search?: string; sexo?: string; edadMin?: number; edadMax?: number }) {
+  async getAll(params?: { search?: string; sexo?: string; edadMin?: number; edadMax?: number; activo?: boolean }) {
     const response = await api.get<ApiResponse<Patient[]>>('/api/patients', { params })
+    return response.data
+  },
+  async getPaginated(params?: { search?: string; sexo?: string; edadMin?: number; edadMax?: number; page?: number; limit?: number }) {
+    const response = await api.get<ApiResponse<PaginatedPatients>>('/api/patients', { params })
     return response.data
   },
   async getById(id: number) {

@@ -94,7 +94,7 @@ const { success, error } = useNotification()
 
 const appointment = ref<Appointment | null>(null)
 const loading = ref(true)
-const statuses: AppointmentStatus[] = ['Programada', 'Confirmada', 'Atendida', 'Cancelada', 'No asistió']
+const statuses: AppointmentStatus[] = ['Programada', 'Atendida', 'No asistió']
 
 async function changeStatus(estado: AppointmentStatus) {
   try {
