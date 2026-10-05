@@ -158,7 +158,7 @@ async function handleSubmit() {
       await appointmentsService.create(form)
       success('Cita creada correctamente')
     }
-    router.push('/appointments')
+    await router.replace({ path: '/appointments', query: { refreshed: String(Date.now()) } })
   } catch (err: unknown) {
     const e = err as { response?: { data?: { message?: string } } }
     serverError.value = e.response?.data?.message || 'Error al guardar la cita'

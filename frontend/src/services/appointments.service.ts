@@ -13,15 +13,21 @@ export interface CreateAppointmentData {
 
 export const appointmentsService = {
   async getAll(params?: { fecha?: string; estado?: string; patientId?: number }) {
-    const response = await api.get<ApiResponse<Appointment[]>>('/api/appointments', { params })
+    const response = await api.get<ApiResponse<Appointment[]>>('/api/appointments', {
+      params: { ...params, _refresh: Date.now() },
+    })
     return response.data
   },
   async getToday() {
-    const response = await api.get<ApiResponse<Appointment[]>>('/api/appointments/today')
+    const response = await api.get<ApiResponse<Appointment[]>>('/api/appointments/today', {
+      params: { _refresh: Date.now() },
+    })
     return response.data
   },
   async getWeek() {
-    const response = await api.get<ApiResponse<Appointment[]>>('/api/appointments/week')
+    const response = await api.get<ApiResponse<Appointment[]>>('/api/appointments/week', {
+      params: { _refresh: Date.now() },
+    })
     return response.data
   },
   async getMonth() {
