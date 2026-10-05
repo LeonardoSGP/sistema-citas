@@ -13,11 +13,8 @@ export function useFormatters() {
 
   function formatTime(timeStr: string): string {
     if (!timeStr) return ''
-    // Handle ISO date string that contains time
-    const date = new Date(timeStr)
-    if (!isNaN(date.getTime())) {
-      return date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false })
-    }
+    const timeMatch = timeStr.match(/T(\d{2}):(\d{2})|^(\d{2}):(\d{2})/)
+    if (timeMatch) return `${timeMatch[1] || timeMatch[3]}:${timeMatch[2] || timeMatch[4]}`
     return timeStr.substring(0, 5)
   }
 
