@@ -160,11 +160,11 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="label">Hora inicio</label>
-                <input v-model="rescheduleForm.horaInicio" type="time" class="input-field" />
+                <input v-model="rescheduleForm.horaInicio" type="time" min="08:00" max="14:00" class="input-field" />
               </div>
               <div>
                 <label class="label">Hora fin</label>
-                <input v-model="rescheduleForm.horaFin" type="time" class="input-field" />
+                <input v-model="rescheduleForm.horaFin" type="time" min="08:00" max="14:00" class="input-field" />
               </div>
             </div>
           </div>
@@ -259,6 +259,14 @@ async function submitReschedule() {
   }
   if (rescheduleForm.value.horaFin <= rescheduleForm.value.horaInicio) {
     rescheduleError.value = 'La hora de fin debe ser posterior a la hora de inicio'
+    return
+  }
+  if (rescheduleForm.value.horaInicio < '08:00') {
+    rescheduleError.value = 'Las citas deben iniciar a partir de las 08:00'
+    return
+  }
+  if (rescheduleForm.value.horaFin > '14:00') {
+    rescheduleError.value = 'Las citas deben terminar a más tardar a las 14:00'
     return
   }
   rescheduleLoading.value = true

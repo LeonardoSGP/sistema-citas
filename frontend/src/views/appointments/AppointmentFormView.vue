@@ -33,12 +33,12 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="label text-rose-900">Hora inicio</label>
-            <input v-model="form.horaInicio" type="time" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaInicio}" />
+            <input v-model="form.horaInicio" type="time" min="08:00" max="14:00" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaInicio}" />
             <p v-if="errors.horaInicio" class="text-red-500 text-xs mt-1">{{ errors.horaInicio }}</p>
           </div>
           <div>
             <label class="label text-rose-900">Hora fin</label>
-            <input v-model="form.horaFin" type="time" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaFin}" />
+            <input v-model="form.horaFin" type="time" min="08:00" max="14:00" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaFin}" />
             <p v-if="errors.horaFin" class="text-red-500 text-xs mt-1">{{ errors.horaFin }}</p>
           </div>
         </div>
@@ -139,6 +139,14 @@ function validate() {
   }
   if (!form.horaInicio) { errors.horaInicio = 'La hora de inicio es obligatoria'; valid = false }
   if (!form.horaFin) { errors.horaFin = 'La hora de fin es obligatoria'; valid = false }
+  if (form.horaInicio && form.horaInicio < '08:00') {
+    errors.horaInicio = 'Las citas deben iniciar a partir de las 08:00'
+    valid = false
+  }
+  if (form.horaFin && form.horaFin > '14:00') {
+    errors.horaFin = 'Las citas deben terminar a más tardar a las 14:00'
+    valid = false
+  }
   if (form.horaInicio && form.horaFin && form.horaFin <= form.horaInicio) {
     errors.horaFin = 'La hora de fin debe ser posterior a la hora de inicio'
     valid = false

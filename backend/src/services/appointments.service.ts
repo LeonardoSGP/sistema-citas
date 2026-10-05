@@ -1,5 +1,20 @@
 import prisma from '../config/database';
 
+const OPENING_TIME = '08:00';
+const CLOSING_TIME = '14:00';
+
+function validateBusinessHours(horaInicio: string, horaFin: string) {
+  if (horaInicio < OPENING_TIME) {
+    throw new Error('Las citas deben iniciar a partir de las 08:00');
+  }
+  if (horaFin > CLOSING_TIME) {
+    throw new Error('Las citas deben terminar a más tardar a las 14:00');
+  }
+  if (horaFin <= horaInicio) {
+    throw new Error('La hora de fin debe ser posterior a la hora de inicio');
+  }
+}
+
 export const appointmentsService = {
   async getAll(filters?: { fecha?: string; estado?: string; patientId?: number }) {
     const where: Record<string, unknown> = {};
@@ -97,6 +112,8 @@ export const appointmentsService = {
     motivo?: string;
     observaciones?: string;
   }) {
+    validateBusinessHours(data.horaInicio, data.horaFin);
+
     // Validate not in the past
     const appointmentDate = new Date(data.fecha);
     const today = new Date();
@@ -142,6 +159,7 @@ export const appointmentsService = {
       const fecha = data.fecha || existing.fecha.toISOString().substring(0, 10);
       const horaInicio = data.horaInicio || existing.horaInicio.toISOString().substring(11, 16);
       const horaFin = data.horaFin || existing.horaFin.toISOString().substring(11, 16);
+      validateBusinessHours(horaInicio, horaFin);
 
       // Validate not in the past (only when changing date)
       if (data.fecha) {
@@ -176,6 +194,8 @@ export const appointmentsService = {
   },
 
   async reschedule(id: number, data: { fecha: string; horaInicio: string; horaFin: string }) {
+    validateBusinessHours(data.horaInicio, data.horaFin);
+
     // Validate not in the past
     const appointmentDate = new Date(data.fecha);
     const today = new Date();

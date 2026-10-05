@@ -51,7 +51,7 @@ export const appointmentsController = {
       sendSuccess(res, appointment, 'Cita registrada correctamente', 201);
     } catch (error) {
       const msg = (error as Error).message;
-      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') ? 400 : 500;
+      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') ? 400 : 500;
       sendError(res, msg, status);
     }
   },
@@ -60,7 +60,7 @@ export const appointmentsController = {
       sendSuccess(res, await appointmentsService.update(Number(req.params.id), req.body), 'Cita actualizada');
     } catch (error) {
       const msg = (error as Error).message;
-      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') ? 400 : 500;
+      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') ? 400 : 500;
       sendError(res, msg, status);
     }
   },
@@ -70,7 +70,7 @@ export const appointmentsController = {
       sendSuccess(res, appointment, 'Cita re-programada correctamente');
     } catch (error) {
       const msg = (error as Error).message;
-      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') ? 400 : 500;
+      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') ? 400 : 500;
       sendError(res, msg, status);
     }
   },
