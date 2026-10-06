@@ -16,7 +16,7 @@
       <form @submit.prevent="handleSubmit" class="space-y-6">
         <div class="grid gap-5 sm:grid-cols-2">
         <div>
-          <label class="label text-rose-900">Número de Expediente</label>
+          <label class="label text-rose-900">Número de Expediente <span class="font-normal text-rose-500">(opcional)</span></label>
           <input v-model="form.expediente" type="text" class="input-field"
             :class="{ 'border-red-500 ring-4 ring-red-50': errors.expediente }" placeholder="0001"
             maxlength="4" @input="onExpedienteInput" />
@@ -31,7 +31,7 @@
         </div>
 
         <div>
-          <label class="label text-rose-900">Teléfono</label>
+          <label class="label text-rose-900">Teléfono <span class="font-normal text-rose-500">(opcional)</span></label>
           <input v-model="form.telefono" type="tel" class="input-field"
             :class="{ 'border-red-500 ring-4 ring-red-50': errors.telefono }" placeholder="5512345678"
             maxlength="10" @input="onTelefonoInput" />
@@ -107,16 +107,12 @@ function validate() {
   errors.edad = ''
   errors.sexo = ''
 
-  if (!form.expediente.trim()) {
-    errors.expediente = 'El número de expediente es obligatorio'; valid = false
-  } else if (!/^\d{4}$/.test(form.expediente)) {
-    errors.expediente = 'El expediente debe ser exactamente 4 dígitos numéricos'; valid = false
+  if (form.expediente.trim() && !/^\d{4}$/.test(form.expediente)) {
+    errors.expediente = 'El expediente debe tener 4 dígitos numéricos'; valid = false
   }
   if (!form.nombre.trim()) { errors.nombre = 'El nombre es obligatorio'; valid = false }
-  if (!form.telefono.trim()) {
-    errors.telefono = 'El teléfono es obligatorio'; valid = false
-  } else if (!/^\d{10}$/.test(form.telefono)) {
-    errors.telefono = 'El teléfono debe tener exactamente 10 dígitos numéricos'; valid = false
+  if (form.telefono.trim() && !/^\d{10}$/.test(form.telefono)) {
+    errors.telefono = 'El teléfono debe tener 10 dígitos numéricos'; valid = false
   }
   if (form.edad < 0 || form.edad > 150) { errors.edad = 'La edad debe ser entre 0 y 150'; valid = false }
   if (!form.sexo) { errors.sexo = 'El sexo es obligatorio'; valid = false }

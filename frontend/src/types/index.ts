@@ -6,9 +6,9 @@ export interface User {
 
 export interface Patient {
   id: number
-  expediente: string
+  expediente: string | null
   nombre: string
-  telefono: string
+  telefono: string | null
   edad: number
   sexo: string
   activo: boolean
@@ -16,6 +16,7 @@ export interface Patient {
   updatedAt: string
   appointments?: Appointment[]
   sessionNotes?: SessionNote[]
+  _count?: { appointments: number }
 }
 
 export interface Appointment {

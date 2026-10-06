@@ -49,16 +49,21 @@
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-primary-800">Teléfono</th>
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-primary-800">Edad</th>
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-primary-800">Sexo</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-primary-800">Tipo</th>
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-primary-800">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-rose-100">
-            <tr v-for="patient in patients" :key="patient.id" class="hover:bg-rose-100/60">
-              <td class="px-6 py-4 text-sm font-mono text-primary-700">{{ patient.expediente }}</td>
+            <tr v-for="patient in patients" :key="patient.id" :class="patient._count?.appointments ? 'bg-rose-50/40 hover:bg-rose-100/60' : 'bg-emerald-50/50 hover:bg-emerald-100/60'">
+              <td class="px-6 py-4 text-sm font-mono text-primary-700">{{ patient.expediente || '-' }}</td>
               <td class="px-6 py-4 text-sm font-medium text-rose-950">{{ patient.nombre }}</td>
               <td class="px-6 py-4 text-sm text-rose-800">{{ formatPhone(patient.telefono) }}</td>
               <td class="px-6 py-4 text-sm text-rose-800">{{ patient.edad }} años</td>
               <td class="px-6 py-4 text-sm text-rose-800">{{ patient.sexo }}</td>
+              <td class="px-6 py-4">
+                <span v-if="patient._count?.appointments" class="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-medium text-rose-700">Continuidad</span>
+                <span v-else class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">Nuevo</span>
+              </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
                   <RouterLink :to="`/patients/${patient.id}/expediente`" class="text-primary-600 hover:text-primary-700 text-sm font-medium">Expediente</RouterLink>
@@ -71,11 +76,11 @@
 
         <!-- Mobile cards -->
         <div class="divide-y divide-rose-100 md:hidden">
-          <div v-for="patient in patients" :key="patient.id" class="p-4 hover:bg-rose-100/60">
+          <div v-for="patient in patients" :key="patient.id" class="p-4" :class="patient._count?.appointments ? 'bg-rose-50/40 hover:bg-rose-100/60' : 'bg-emerald-50/50 hover:bg-emerald-100/60'">
             <div class="flex items-start justify-between">
               <div>
                 <p class="font-medium text-rose-950">{{ patient.nombre }}</p>
-                <p class="font-mono text-sm text-primary-700">{{ patient.expediente }}</p>
+                <p class="font-mono text-sm text-primary-700">{{ patient.expediente || 'Sin expediente' }}</p>
                 <p class="text-sm text-rose-800">{{ patient.edad }} años · {{ patient.sexo }}</p>
                 <p class="text-sm text-rose-800">Tel: {{ formatPhone(patient.telefono) }}</p>
               </div>
@@ -83,6 +88,8 @@
             <div class="flex gap-3 mt-3">
               <RouterLink :to="`/patients/${patient.id}/expediente`" class="btn-secondary btn-sm text-xs">Expediente</RouterLink>
               <RouterLink :to="`/patients/${patient.id}/edit`" class="btn-secondary btn-sm text-xs">Editar</RouterLink>
+              <span v-if="patient._count?.appointments" class="rounded-full bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700">Continuidad</span>
+              <span v-else class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">Nuevo</span>
             </div>
           </div>
         </div>
@@ -146,7 +153,7 @@ const ageRangeMap: Record<string, { min: number; max: number }> = {
   '60+': { min: 60, max: 150 },
 }
 
-function formatPhone(phone: string): string {
+function formatPhone(phone: string | null): string {
   if (!phone || phone.length !== 10) return phone || '-'
   return `${phone.slice(0, 3)}-${phone.slice(3, 6)}-${phone.slice(6)}`
 }

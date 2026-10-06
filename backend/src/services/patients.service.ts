@@ -23,6 +23,7 @@ export const patientsService = {
   async getAll(filters?: { search?: string; sexo?: string; edadMin?: number; edadMax?: number; activo?: boolean }) {
     return prisma.patient.findMany({
       where: this.buildWhere(filters),
+      include: { _count: { select: { appointments: true } } },
       orderBy: { nombre: 'asc' },
     });
   },
@@ -36,6 +37,7 @@ export const patientsService = {
     const [items, total] = await Promise.all([
       prisma.patient.findMany({
         where,
+        include: { _count: { select: { appointments: true } } },
         orderBy: { nombre: 'asc' },
         skip: (page - 1) * limit,
         take: limit,
@@ -70,13 +72,15 @@ export const patientsService = {
     return patient;
   },
 
-  async create(data: { expediente: string; nombre: string; telefono: string; edad: number; sexo: string }) {
-    const existing = await prisma.patient.findUnique({ where: { expediente: data.expediente } });
+  async create(data: { expediente: string | null; nombre: string; telefono: string | null; edad: number; sexo: string }) {
+    const existing = data.expediente
+      ? await prisma.patient.findUnique({ where: { expediente: data.expediente } })
+      : null;
     if (existing) throw new Error('Ya existe un paciente con ese número de expediente');
     return prisma.patient.create({ data });
   },
 
-  async update(id: number, data: Partial<{ expediente: string; nombre: string; telefono: string; edad: number; sexo: string }>) {
+  async update(id: number, data: Partial<{ expediente: string | null; nombre: string; telefono: string | null; edad: number; sexo: string }>) {
     if (data.expediente) {
       const existing = await prisma.patient.findFirst({
         where: { expediente: data.expediente, NOT: { id } },

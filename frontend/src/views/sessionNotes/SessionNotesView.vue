@@ -108,7 +108,7 @@ const filteredPatients = computed(() => {
   if (!query) return patients.value
   return patients.value.filter((patient) =>
     patient.nombre.toLowerCase().includes(query) ||
-    patient.expediente.toLowerCase().includes(query)
+    (patient.expediente || '').toLowerCase().includes(query)
   )
 })
 
