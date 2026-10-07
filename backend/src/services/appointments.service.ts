@@ -2,6 +2,26 @@ import prisma from '../config/database';
 
 const OPENING_TIME = '08:00';
 const CLOSING_TIME = '14:00';
+const BUSINESS_TIME_ZONE = 'America/Mexico_City';
+
+function getBusinessDateString(date = new Date()): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: BUSINESS_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
+
+function dateOnlyToUtc(dateString: string): Date {
+  return new Date(`${dateString}T00:00:00.000Z`);
+}
+
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setUTCDate(result.getUTCDate() + days);
+  return result;
+}
 
 function validateBusinessHours(horaInicio: string, horaFin: string) {
   if (horaInicio < OPENING_TIME) {
@@ -21,9 +41,8 @@ export const appointmentsService = {
     if (filters?.estado) where.estado = filters.estado;
     if (filters?.patientId) where.patientId = filters.patientId;
     if (filters?.fecha) {
-      const date = new Date(filters.fecha);
-      const nextDay = new Date(date);
-      nextDay.setDate(nextDay.getDate() + 1);
+      const date = dateOnlyToUtc(filters.fecha);
+      const nextDay = addDays(date, 1);
       where.fecha = { gte: date, lt: nextDay };
     }
     return prisma.appointment.findMany({
@@ -34,10 +53,8 @@ export const appointmentsService = {
   },
 
   async getToday() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const today = dateOnlyToUtc(getBusinessDateString());
+    const tomorrow = addDays(today, 1);
     return prisma.appointment.findMany({
       where: { fecha: { gte: today, lt: tomorrow } },
       include: { patient: { select: { id: true, nombre: true, expediente: true } } },
@@ -46,10 +63,8 @@ export const appointmentsService = {
   },
 
   async getWeek() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const endOfWeek = new Date(today);
-    endOfWeek.setDate(today.getDate() + 7);
+    const today = dateOnlyToUtc(getBusinessDateString());
+    const endOfWeek = addDays(today, 7);
     return prisma.appointment.findMany({
       where: { fecha: { gte: today, lt: endOfWeek } },
       include: { patient: { select: { id: true, nombre: true, expediente: true } } },
@@ -58,10 +73,11 @@ export const appointmentsService = {
   },
 
   async getMonth() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const [year, month] = getBusinessDateString().split('-').map(Number);
+    const startOfMonth = dateOnlyToUtc(`${year}-${String(month).padStart(2, '0')}-01`);
+    const endOfMonth = month === 12
+      ? dateOnlyToUtc(`${year + 1}-01-01`)
+      : dateOnlyToUtc(`${year}-${String(month + 1).padStart(2, '0')}-01`);
     return prisma.appointment.findMany({
       where: { fecha: { gte: startOfMonth, lt: endOfMonth } },
       include: { patient: { select: { id: true, nombre: true, expediente: true } } },
@@ -79,9 +95,8 @@ export const appointmentsService = {
   },
 
   async checkConflict(fecha: string, horaInicio: string, horaFin: string, excludeId?: number) {
-    const dateObj = new Date(fecha);
-    const nextDay = new Date(dateObj);
-    nextDay.setDate(nextDay.getDate() + 1);
+    const dateObj = dateOnlyToUtc(fecha);
+    const nextDay = addDays(dateObj, 1);
     const startTime = new Date(`1970-01-01T${horaInicio}:00.000Z`);
     const endTime = new Date(`1970-01-01T${horaFin}:00.000Z`);
 
@@ -115,10 +130,7 @@ export const appointmentsService = {
     validateBusinessHours(data.horaInicio, data.horaFin);
 
     // Validate not in the past
-    const appointmentDate = new Date(data.fecha);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (appointmentDate < today) {
+    if (data.fecha < getBusinessDateString()) {
       throw new Error('No se pueden agendar citas en fechas pasadas');
     }
 
@@ -131,7 +143,7 @@ export const appointmentsService = {
     return prisma.appointment.create({
       data: {
         patientId: data.patientId,
-        fecha: new Date(data.fecha),
+        fecha: dateOnlyToUtc(data.fecha),
         horaInicio: new Date(`1970-01-01T${data.horaInicio}:00.000Z`),
         horaFin: new Date(`1970-01-01T${data.horaFin}:00.000Z`),
         estado: data.estado || 'Programada',
@@ -163,10 +175,7 @@ export const appointmentsService = {
 
       // Validate not in the past (only when changing date)
       if (data.fecha) {
-        const appointmentDate = new Date(data.fecha);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (appointmentDate < today) {
+        if (data.fecha < getBusinessDateString()) {
           throw new Error('No se pueden re-programar citas a fechas pasadas');
         }
       }
@@ -180,7 +189,7 @@ export const appointmentsService = {
 
     const updateData: Record<string, unknown> = {};
     if (data.patientId !== undefined) updateData.patientId = data.patientId;
-    if (data.fecha !== undefined) updateData.fecha = new Date(data.fecha);
+    if (data.fecha !== undefined) updateData.fecha = dateOnlyToUtc(data.fecha);
     if (data.horaInicio !== undefined) updateData.horaInicio = new Date(`1970-01-01T${data.horaInicio}:00.000Z`);
     if (data.horaFin !== undefined) updateData.horaFin = new Date(`1970-01-01T${data.horaFin}:00.000Z`);
     if (data.estado !== undefined) updateData.estado = data.estado;
@@ -197,10 +206,7 @@ export const appointmentsService = {
     validateBusinessHours(data.horaInicio, data.horaFin);
 
     // Validate not in the past
-    const appointmentDate = new Date(data.fecha);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (appointmentDate < today) {
+    if (data.fecha < getBusinessDateString()) {
       throw new Error('No se pueden re-programar citas a fechas pasadas');
     }
 
@@ -213,7 +219,7 @@ export const appointmentsService = {
     return prisma.appointment.update({
       where: { id },
       data: {
-        fecha: new Date(data.fecha),
+        fecha: dateOnlyToUtc(data.fecha),
         horaInicio: new Date(`1970-01-01T${data.horaInicio}:00.000Z`),
         horaFin: new Date(`1970-01-01T${data.horaFin}:00.000Z`),
         estado: 'Programada',
@@ -231,21 +237,22 @@ export const appointmentsService = {
   },
 
   async getStats(period: 'week' | 'month', referenceDate?: string) {
-    const selectedDate = referenceDate ? new Date(`${referenceDate}T00:00:00`) : new Date();
-    if (Number.isNaN(selectedDate.getTime())) throw new Error('Fecha de estadísticas inválida');
-    selectedDate.setHours(0, 0, 0, 0);
+    const selectedDateString = referenceDate || getBusinessDateString();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDateString)) throw new Error('Fecha de estadísticas inválida');
+    const selectedDate = dateOnlyToUtc(selectedDateString);
     let start: Date;
     let end: Date;
 
     if (period === 'week') {
-      const dayOfWeek = selectedDate.getDay();
+      const dayOfWeek = selectedDate.getUTCDay();
       start = new Date(selectedDate);
-      start.setDate(selectedDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+      start.setUTCDate(selectedDate.getUTCDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
       end = new Date(start);
-      end.setDate(start.getDate() + 7);
+      end.setUTCDate(start.getUTCDate() + 7);
     } else {
-      start = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      end = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1);
+      start = dateOnlyToUtc(`${selectedDate.getUTCFullYear()}-${String(selectedDate.getUTCMonth() + 1).padStart(2, '0')}-01`);
+      end = addDays(start, 32);
+      end = dateOnlyToUtc(`${end.getUTCFullYear()}-${String(end.getUTCMonth() + 1).padStart(2, '0')}-01`);
     }
 
     const appointments = await prisma.appointment.findMany({

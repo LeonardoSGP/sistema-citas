@@ -126,7 +126,13 @@ const totalPatients = ref(0)
 const loadingMonth = ref(true)
 
 const currentDate = ref(new Date())
-const selectedDateStr = ref(new Date().toISOString().substring(0, 10))
+const getLocalDateString = (date = new Date()) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+const selectedDateStr = ref(getLocalDateString())
 
 const currentMonthName = computed(() => {
   return currentDate.value.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })
@@ -142,7 +148,7 @@ const stats = computed(() => ({
   todayAppointments: todayAppointments.value.length,
   weekAppointments: weekAppointments.value.length,
   upcomingAppointments: monthAppointments.value.filter(
-    (a) => a.estado === 'Programada' && new Date(a.fecha) >= new Date(new Date().setHours(0,0,0,0))
+    (a) => a.estado === 'Programada' && a.fecha.substring(0, 10) >= getLocalDateString()
   ).length,
 }))
 
@@ -188,8 +194,8 @@ const calendarDays = computed<CalendarDay[]>(() => {
 })
 
 function createCalendarDay(date: Date, isCurrentMonth: boolean): CalendarDay {
-  const dateStr = date.toISOString().substring(0, 10)
-  const todayStr = new Date().toISOString().substring(0, 10)
+  const dateStr = getLocalDateString(date)
+  const todayStr = getLocalDateString()
   
   const appts = monthAppointments.value.filter(a => a.fecha.startsWith(dateStr))
   
@@ -209,7 +215,7 @@ const selectedDateAppointments = computed(() => {
 })
 
 function selectDate(date: Date) {
-  selectedDateStr.value = date.toISOString().substring(0, 10)
+  selectedDateStr.value = getLocalDateString(date)
 }
 
 function prevMonth() {
@@ -236,15 +242,12 @@ async function loadMonthData() {
   try {
     const year = currentDate.value.getFullYear()
     const month = currentDate.value.getMonth()
-    const start = new Date(year, month, 1).toISOString().substring(0, 10)
-    const end = new Date(year, month + 1, 0).toISOString().substring(0, 10)
-    
     // In a real app we'd fetch with date filters. Since our API returns month relative to current,
     // let's fetch all and filter client side for now.
     const response = await appointmentsService.getAll() 
     monthAppointments.value = response.data.filter(a => {
-      const aDate = new Date(a.fecha)
-      return aDate.getFullYear() === year && aDate.getMonth() === month
+      const aDate = a.fecha.substring(0, 10)
+      return aDate.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)
     })
   } catch (err) {
     console.error(err)
