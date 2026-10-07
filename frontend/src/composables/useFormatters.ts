@@ -1,24 +1,45 @@
 export function useFormatters() {
+  const monthNames = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+  ]
+
+  function getCalendarParts(dateValue: string | Date) {
+    if (dateValue instanceof Date) {
+      return {
+        year: dateValue.getFullYear(),
+        month: dateValue.getMonth() + 1,
+        day: dateValue.getDate(),
+      }
+    }
+
+    const match = dateValue.match(/^(\d{4})-(\d{2})-(\d{2})/)
+    if (match) {
+      return {
+        year: Number(match[1]),
+        month: Number(match[2]),
+        day: Number(match[3]),
+      }
+    }
+
+    const date = new Date(dateValue)
+    return {
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+      day: date.getDate(),
+    }
+  }
+
   function formatDate(dateStr: string | Date): string {
     if (!dateStr) return ''
-    const date = parseCalendarDate(dateStr)
-    return date.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })
+    const { year, month, day } = getCalendarParts(dateStr)
+    return `${day} de ${monthNames[month - 1]} de ${year}`
   }
 
   function formatShortDate(dateStr: string | Date): string {
     if (!dateStr) return ''
-    const date = parseCalendarDate(dateStr)
-    return date.toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' })
-  }
-
-  function parseCalendarDate(dateValue: string | Date): Date {
-    if (dateValue instanceof Date) return dateValue
-    const datePart = dateValue.substring(0, 10)
-    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
-      const [year, month, day] = datePart.split('-').map(Number)
-      return new Date(year, month - 1, day)
-    }
-    return new Date(dateValue)
+    const { year, month, day } = getCalendarParts(dateStr)
+    return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`
   }
 
   function formatTime(timeStr: string): string {
