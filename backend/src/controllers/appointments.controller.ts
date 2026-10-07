@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { appointmentsService } from '../services/appointments.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../types';
@@ -50,6 +51,10 @@ export const appointmentsController = {
       const appointment = await appointmentsService.create(req.body);
       sendSuccess(res, appointment, 'Cita registrada correctamente', 201);
     } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        sendError(res, 'Ya existe una cita en esa fecha y hora de inicio.', 409);
+        return;
+      }
       const msg = (error as Error).message;
       const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') ? 400 : 500;
       sendError(res, msg, status);
@@ -59,6 +64,10 @@ export const appointmentsController = {
     try {
       sendSuccess(res, await appointmentsService.update(Number(req.params.id), req.body), 'Cita actualizada');
     } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        sendError(res, 'Ya existe una cita en esa fecha y hora de inicio.', 409);
+        return;
+      }
       const msg = (error as Error).message;
       const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') ? 400 : 500;
       sendError(res, msg, status);
@@ -69,6 +78,10 @@ export const appointmentsController = {
       const appointment = await appointmentsService.reschedule(Number(req.params.id), req.body);
       sendSuccess(res, appointment, 'Cita re-programada correctamente');
     } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        sendError(res, 'Ya existe una cita en esa fecha y hora de inicio.', 409);
+        return;
+      }
       const msg = (error as Error).message;
       const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') ? 400 : 500;
       sendError(res, msg, status);
