@@ -260,16 +260,12 @@ export const appointmentsService = {
         fecha: { gte: start, lt: end },
         estado: 'Atendida',
       },
-      include: { patient: { select: { id: true, nombre: true, sexo: true, edad: true } } },
     });
 
-    // Count unique patients
-    const patientMap = new Map<number, { sexo: string; edad: number }>();
-    for (const appt of appointments) {
-      if (appt.patient && !patientMap.has(appt.patient.id)) {
-        patientMap.set(appt.patient.id, { sexo: appt.patient.sexo, edad: appt.patient.edad });
-      }
-    }
+    const patients = await prisma.patient.findMany({
+      where: { activo: true },
+      select: { id: true, sexo: true, edad: true },
+    });
 
     let hombres = 0;
     let mujeres = 0;
@@ -282,7 +278,7 @@ export const appointmentsService = {
       '60+': { total: 0, hombres: 0, mujeres: 0 },
     };
 
-    for (const [, patient] of patientMap) {
+    for (const patient of patients) {
       if (patient.sexo === 'Masculino') hombres++;
       else if (patient.sexo === 'Femenino') mujeres++;
       else otros++;
@@ -304,7 +300,7 @@ export const appointmentsService = {
       startDate: start.toISOString(),
       endDate: end.toISOString(),
       totalAppointments: appointments.length,
-      totalPatients: patientMap.size,
+      totalPatients: patients.length,
       gender: { hombres, mujeres, otros },
       ageRanges,
     };
