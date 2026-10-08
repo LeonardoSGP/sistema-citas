@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6 rounded-[2rem] bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 p-4 sm:p-6">
     <div class="flex flex-col gap-4 rounded-[1.75rem] border border-rose-100 bg-rose-100/70 p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
-      <h2 class="text-xl font-semibold text-primary-900">Estadísticas de pacientes</h2>
+      <h2 class="text-xl font-semibold text-primary-900">Estadísticas de pacientes atendidos</h2>
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div class="flex w-fit gap-1 rounded-2xl border border-rose-200 bg-rose-50/80 p-1">
         <button
