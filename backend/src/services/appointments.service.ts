@@ -129,11 +129,6 @@ export const appointmentsService = {
   }) {
     validateBusinessHours(data.horaInicio, data.horaFin);
 
-    // Validate not in the past
-    if (data.fecha < getBusinessDateString()) {
-      throw new Error('No se pueden agendar citas en fechas pasadas');
-    }
-
     // Check for time conflicts
     const conflict = await this.checkConflict(data.fecha, data.horaInicio, data.horaFin);
     if (conflict) {
@@ -173,13 +168,6 @@ export const appointmentsService = {
       const horaFin = data.horaFin || existing.horaFin.toISOString().substring(11, 16);
       validateBusinessHours(horaInicio, horaFin);
 
-      // Validate not in the past (only when changing date)
-      if (data.fecha) {
-        if (data.fecha < getBusinessDateString()) {
-          throw new Error('No se pueden re-programar citas a fechas pasadas');
-        }
-      }
-
       // Check for conflicts (excluding current appointment)
       const conflict = await this.checkConflict(fecha, horaInicio, horaFin, id);
       if (conflict) {
@@ -204,11 +192,6 @@ export const appointmentsService = {
 
   async reschedule(id: number, data: { fecha: string; horaInicio: string; horaFin: string }) {
     validateBusinessHours(data.horaInicio, data.horaFin);
-
-    // Validate not in the past
-    if (data.fecha < getBusinessDateString()) {
-      throw new Error('No se pueden re-programar citas a fechas pasadas');
-    }
 
     // Check for conflicts
     const conflict = await this.checkConflict(data.fecha, data.horaInicio, data.horaFin, id);

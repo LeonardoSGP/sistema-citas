@@ -26,7 +26,7 @@
         <div class="grid gap-5 sm:grid-cols-2">
         <div>
           <label class="label text-rose-900">Fecha</label>
-          <input v-model="form.fecha" type="date" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.fecha}" :min="todayStr" />
+          <input v-model="form.fecha" type="date" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.fecha}" />
           <p v-if="errors.fecha" class="text-red-500 text-xs mt-1">{{ errors.fecha }}</p>
         </div>
 
@@ -97,11 +97,6 @@ const loading = ref(false)
 const serverError = ref('')
 const patients = ref<Patient[]>([])
 
-const todayStr = computed(() => {
-  const d = new Date()
-  return d.toISOString().substring(0, 10)
-})
-
 const form = reactive({
   patientId: 0,
   fecha: '',
@@ -130,12 +125,6 @@ function validate() {
   if (!form.fecha) {
     errors.fecha = 'La fecha es obligatoria'; valid = false
   } else {
-    const selectedDate = new Date(form.fecha + 'T00:00:00')
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    if (selectedDate < today) {
-      errors.fecha = 'No se pueden agendar citas en fechas pasadas'; valid = false
-    }
   }
   if (!form.horaInicio) { errors.horaInicio = 'La hora de inicio es obligatoria'; valid = false }
   if (!form.horaFin) { errors.horaFin = 'La hora de fin es obligatoria'; valid = false }

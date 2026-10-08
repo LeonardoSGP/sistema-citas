@@ -155,7 +155,7 @@
           <div class="space-y-3">
             <div>
               <label class="label">Nueva fecha</label>
-              <input v-model="rescheduleForm.fecha" type="date" class="input-field" :min="todayStr" />
+              <input v-model="rescheduleForm.fecha" type="date" class="input-field" />
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -229,11 +229,6 @@ const rescheduleAppt = ref<Appointment | null>(null)
 const rescheduleLoading = ref(false)
 const rescheduleError = ref('')
 const rescheduleForm = ref({ fecha: '', horaInicio: '', horaFin: '' })
-
-const todayStr = computed(() => {
-  const d = new Date()
-  return d.toISOString().substring(0, 10)
-})
 
 function openReschedule(appt: Appointment) {
   rescheduleAppt.value = appt
