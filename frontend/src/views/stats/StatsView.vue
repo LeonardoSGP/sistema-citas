@@ -100,15 +100,41 @@
         <div class="mb-4 flex items-center justify-between">
           <h3 class="font-semibold text-primary-900">Pacientes atendidos</h3>
           <span class="rounded-full bg-rose-100 px-3 py-1 text-sm font-semibold text-primary-700">
-            {{ stats.totalPatients }} {{ getPluralLabel(stats.totalPatients, 'paciente', 'pacientes') }}
+            {{ filteredPatients.length }} de {{ stats.totalPatients }}
           </span>
+        </div>
+        <div v-if="stats.attendedPatients.length" class="mb-5 grid grid-cols-1 gap-3 rounded-2xl border border-rose-100 bg-rose-50/60 p-3 md:grid-cols-3">
+          <input
+            v-model="patientSearch"
+            type="search"
+            class="input-field bg-white"
+            placeholder="Buscar nombre, expediente o teléfono"
+            aria-label="Buscar paciente atendido"
+          />
+          <select v-model="patientSex" class="input-field bg-white" aria-label="Filtrar por sexo">
+            <option value="">Todos los sexos</option>
+            <option value="Femenino">Mujeres</option>
+            <option value="Masculino">Hombres</option>
+            <option value="Otro">Otro</option>
+          </select>
+          <select v-model="patientAgeRange" class="input-field bg-white" aria-label="Filtrar por rango de edad">
+            <option value="">Todas las edades</option>
+            <option value="0-5">0 a 5 años</option>
+            <option value="6-11">6 a 11 años</option>
+            <option value="12-17">12 a 17 años</option>
+            <option value="18-59">18 a 59 años</option>
+            <option value="60+">60 años o más</option>
+          </select>
         </div>
         <p v-if="!stats.attendedPatients.length" class="text-sm text-rose-700">
           No hay pacientes atendidos en este periodo.
         </p>
+        <p v-else-if="!filteredPatients.length" class="rounded-xl border border-rose-100 bg-rose-50/60 p-4 text-sm text-rose-700">
+          No hay pacientes que coincidan con los filtros seleccionados.
+        </p>
         <div v-else class="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div
-            v-for="patient in stats.attendedPatients"
+            v-for="patient in paginatedPatients"
             :key="patient.id"
             class="overflow-hidden rounded-2xl border border-rose-200 bg-white/70 shadow-sm"
           >
@@ -160,6 +186,29 @@
               </div>
             </div>
           </div>
+          <div v-if="filteredPatients.length" class="mt-5 flex flex-col gap-3 border-t border-rose-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm text-rose-700">
+              Página {{ patientPage }} de {{ totalPatientPages }}
+            </p>
+            <div class="flex gap-2">
+              <button
+                type="button"
+                class="btn-secondary btn-sm disabled:cursor-not-allowed disabled:opacity-40"
+                :disabled="patientPage === 1"
+                @click="changePatientPage(patientPage - 1)"
+              >
+                Anterior
+              </button>
+              <button
+                type="button"
+                class="btn-primary btn-sm disabled:cursor-not-allowed disabled:opacity-40"
+                :disabled="patientPage === totalPatientPages"
+                @click="changePatientPage(patientPage + 1)"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </template>
@@ -167,7 +216,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { appointmentsService } from '../../services/appointments.service'
 import type { PatientStats } from '../../types'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
@@ -182,6 +231,48 @@ const stats = ref<PatientStats | null>(null)
 const today = new Date()
 const selectedWeek = ref(today.toISOString().slice(0, 10))
 const selectedMonth = ref(today.toISOString().slice(0, 7))
+const patientSearch = ref('')
+const patientSex = ref('')
+const patientAgeRange = ref('')
+const patientPage = ref(1)
+const patientsPerPage = 4
+
+const filteredPatients = computed(() => {
+  if (!stats.value) return []
+  const query = patientSearch.value.trim().toLocaleLowerCase('es')
+  return stats.value.attendedPatients.filter((patient) => {
+    const matchesSearch = !query ||
+      patient.nombre.toLocaleLowerCase('es').includes(query) ||
+      (patient.expediente || '').includes(query) ||
+      (patient.telefono || '').includes(query)
+    const matchesSex = !patientSex.value || patient.sexo === patientSex.value
+    const matchesAge = !patientAgeRange.value || (
+      patientAgeRange.value === '0-5' ? patient.edad <= 5 :
+      patientAgeRange.value === '6-11' ? patient.edad >= 6 && patient.edad <= 11 :
+      patientAgeRange.value === '12-17' ? patient.edad >= 12 && patient.edad <= 17 :
+      patientAgeRange.value === '18-59' ? patient.edad >= 18 && patient.edad <= 59 :
+      patient.edad >= 60
+    )
+    return matchesSearch && matchesSex && matchesAge
+  })
+})
+
+const totalPatientPages = computed(() =>
+  Math.max(1, Math.ceil(filteredPatients.value.length / patientsPerPage))
+)
+
+const paginatedPatients = computed(() => {
+  const start = (patientPage.value - 1) * patientsPerPage
+  return filteredPatients.value.slice(start, start + patientsPerPage)
+})
+
+watch([patientSearch, patientSex, patientAgeRange], () => {
+  patientPage.value = 1
+})
+
+watch(totalPatientPages, (pages) => {
+  if (patientPage.value > pages) patientPage.value = pages
+})
 
 function getPercentage(value: number) {
   if (!stats.value || stats.value.totalPatients === 0) return 0
@@ -194,6 +285,7 @@ function getPluralLabel(value: number, singular: string, plural: string) {
 
 async function loadStats() {
   loading.value = true
+  patientPage.value = 1
   try {
     const referenceDate = period.value === 'week' ? selectedWeek.value : `${selectedMonth.value}-01`
     const response = await appointmentsService.getStats(period.value, referenceDate)
@@ -203,6 +295,11 @@ async function loadStats() {
   } finally {
     loading.value = false
   }
+}
+
+function changePatientPage(page: number) {
+  if (page < 1 || page > totalPatientPages.value) return
+  patientPage.value = page
 }
 
 onMounted(loadStats)

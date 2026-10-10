@@ -255,6 +255,7 @@ export const appointmentsService = {
           },
         },
       },
+      orderBy: [{ fecha: 'asc' }, { horaInicio: 'asc' }],
     });
 
     const patientMap = new Map<number, {
@@ -297,6 +298,12 @@ export const appointmentsService = {
       }
     }
 
+    for (const patient of patientMap.values()) {
+      patient.appointments.sort((a, b) =>
+        `${a.fecha}${a.horaInicio}`.localeCompare(`${b.fecha}${b.horaInicio}`)
+      );
+    }
+
     let hombres = 0;
     let mujeres = 0;
     let otros = 0;
@@ -332,7 +339,12 @@ export const appointmentsService = {
       totalAppointments: appointments.length,
       totalPatients: patientMap.size,
       attendedPatients: Array.from(patientMap.values())
-        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+        .sort((a, b) => {
+          const firstAppointmentComparison =
+            `${a.appointments[0]?.fecha || ''}${a.appointments[0]?.horaInicio || ''}`
+              .localeCompare(`${b.appointments[0]?.fecha || ''}${b.appointments[0]?.horaInicio || ''}`);
+          return firstAppointmentComparison || a.nombre.localeCompare(b.nombre, 'es');
+        }),
       gender: { hombres, mujeres, otros },
       ageRanges,
     };
