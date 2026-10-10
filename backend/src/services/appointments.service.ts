@@ -243,16 +243,56 @@ export const appointmentsService = {
         fecha: { gte: start, lt: end },
         estado: 'Atendida',
       },
-      include: { patient: { select: { id: true, nombre: true, sexo: true, edad: true } } },
+      include: {
+        patient: {
+          select: {
+            id: true,
+            nombre: true,
+            expediente: true,
+            telefono: true,
+            sexo: true,
+            edad: true,
+          },
+        },
+      },
     });
 
-    const patientMap = new Map<number, { nombre: string; sexo: string; edad: number }>();
+    const patientMap = new Map<number, {
+      id: number;
+      nombre: string;
+      expediente: string | null;
+      telefono: string | null;
+      sexo: string;
+      edad: number;
+      appointments: Array<{
+        id: number;
+        fecha: string;
+        horaInicio: string;
+        horaFin: string;
+        motivo: string | null;
+        observaciones: string | null;
+      }>;
+    }>();
     for (const appt of appointments) {
       if (appt.patient && !patientMap.has(appt.patient.id)) {
         patientMap.set(appt.patient.id, {
+          id: appt.patient.id,
           nombre: appt.patient.nombre,
+          expediente: appt.patient.expediente,
+          telefono: appt.patient.telefono,
           sexo: appt.patient.sexo,
           edad: appt.patient.edad,
+          appointments: [],
+        });
+      }
+      if (appt.patient) {
+        patientMap.get(appt.patient.id)?.appointments.push({
+          id: appt.id,
+          fecha: appt.fecha.toISOString(),
+          horaInicio: appt.horaInicio.toISOString(),
+          horaFin: appt.horaFin.toISOString(),
+          motivo: appt.motivo,
+          observaciones: appt.observaciones,
         });
       }
     }
@@ -291,8 +331,7 @@ export const appointmentsService = {
       endDate: end.toISOString(),
       totalAppointments: appointments.length,
       totalPatients: patientMap.size,
-      attendedPatients: Array.from(patientMap.entries())
-        .map(([id, { nombre }]) => ({ id, nombre }))
+      attendedPatients: Array.from(patientMap.values())
         .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
       gender: { hombres, mujeres, otros },
       ageRanges,

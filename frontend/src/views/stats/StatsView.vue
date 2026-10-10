@@ -99,18 +99,66 @@
       <div class="card border-rose-100 bg-fuchsia-50/80">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="font-semibold text-primary-900">Pacientes atendidos</h3>
-          <span class="text-sm font-medium text-primary-700">{{ stats.totalPatients }}</span>
+          <span class="rounded-full bg-rose-100 px-3 py-1 text-sm font-semibold text-primary-700">
+            {{ stats.totalPatients }} {{ getPluralLabel(stats.totalPatients, 'paciente', 'pacientes') }}
+          </span>
         </div>
         <p v-if="!stats.attendedPatients.length" class="text-sm text-rose-700">
           No hay pacientes atendidos en este periodo.
         </p>
-        <div v-else class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div v-else class="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div
             v-for="patient in stats.attendedPatients"
             :key="patient.id"
-            class="rounded-xl border border-rose-100 bg-rose-50/70 px-3 py-2 text-sm text-rose-900"
+            class="overflow-hidden rounded-2xl border border-rose-200 bg-white/70 shadow-sm"
           >
-            {{ patient.nombre }}
+            <div class="border-b border-rose-100 bg-rose-50/80 px-4 py-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate font-semibold text-primary-900">{{ patient.nombre }}</p>
+                  <p class="mt-1 text-xs text-rose-700">
+                    {{ patient.edad }} años · {{ patient.sexo }}
+                  </p>
+                </div>
+                <span class="shrink-0 rounded-lg bg-fuchsia-100 px-2 py-1 text-xs font-medium text-primary-700">
+                  {{ patient.appointments.length }}
+                  {{ getPluralLabel(patient.appointments.length, 'asistencia', 'asistencias') }}
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 px-4 py-3 text-xs">
+              <div>
+                <p class="text-rose-500">Expediente</p>
+                <p class="mt-0.5 font-medium text-rose-900">{{ patient.expediente || 'Sin asignar' }}</p>
+              </div>
+              <div>
+                <p class="text-rose-500">Teléfono</p>
+                <p class="mt-0.5 font-medium text-rose-900">{{ patient.telefono || 'Sin registrar' }}</p>
+              </div>
+            </div>
+
+            <div class="space-y-3 border-t border-rose-100 px-4 py-3">
+              <p class="text-xs font-semibold uppercase tracking-wide text-primary-700">Detalle de asistencia</p>
+              <div
+                v-for="appointment in patient.appointments"
+                :key="appointment.id"
+                class="rounded-xl border border-rose-100 bg-rose-50/50 p-3"
+              >
+                <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
+                  <span class="font-medium text-rose-900">{{ formatShortDate(appointment.fecha) }}</span>
+                  <span class="text-primary-700">
+                    {{ formatTime(appointment.horaInicio) }} - {{ formatTime(appointment.horaFin) }}
+                  </span>
+                </div>
+                <p v-if="appointment.motivo" class="mt-2 text-xs text-rose-800">
+                  <span class="font-medium">Motivo:</span> {{ appointment.motivo }}
+                </p>
+                <p v-if="appointment.observaciones" class="mt-1 text-xs text-rose-700">
+                  <span class="font-medium">Observaciones:</span> {{ appointment.observaciones }}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -124,8 +172,10 @@ import { appointmentsService } from '../../services/appointments.service'
 import type { PatientStats } from '../../types'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import { useNotification } from '../../composables/useNotification'
+import { useFormatters } from '../../composables/useFormatters'
 
 const { error } = useNotification()
+const { formatShortDate, formatTime } = useFormatters()
 const loading = ref(true)
 const period = ref<'week' | 'month'>('week')
 const stats = ref<PatientStats | null>(null)

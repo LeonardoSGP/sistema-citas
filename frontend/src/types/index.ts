@@ -64,7 +64,22 @@ export interface PatientStats {
   endDate: string
   totalAppointments: number
   totalPatients: number
-  attendedPatients: Array<{ id: number; nombre: string }>
+  attendedPatients: Array<{
+    id: number
+    nombre: string
+    expediente: string | null
+    telefono: string | null
+    sexo: string
+    edad: number
+    appointments: Array<{
+      id: number
+      fecha: string
+      horaInicio: string
+      horaFin: string
+      motivo: string | null
+      observaciones: string | null
+    }>
+  }>
   gender: {
     hombres: number
     mujeres: number
