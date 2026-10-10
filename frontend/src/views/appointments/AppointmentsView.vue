@@ -98,6 +98,20 @@
               <td class="truncate px-3 py-3 text-sm text-rose-800">{{ appt.motivo || '-' }}</td>
               <td class="px-3 py-3">
                 <div class="flex flex-wrap gap-x-2 gap-y-1">
+                  <template v-if="appt.estado === 'Programada'">
+                    <button
+                      type="button"
+                      class="text-sm font-medium text-emerald-600 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      :disabled="statusLoading[appt.id]"
+                      @click="markAttendance(appt, 'Atendida')"
+                    >{{ statusLoading[appt.id] ? 'Guardando...' : 'Asistió' }}</button>
+                    <button
+                      type="button"
+                      class="text-sm font-medium text-slate-500 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      :disabled="statusLoading[appt.id]"
+                      @click="markAttendance(appt, 'No asistió')"
+                    >No asistió</button>
+                  </template>
                   <RouterLink :to="`/appointments/${appt.id}`" class="text-sm text-primary-600 hover:text-primary-700">Ver</RouterLink>
                   <RouterLink :to="`/appointments/${appt.id}/edit`" class="text-sm text-rose-700 hover:text-primary-900">Editar</RouterLink>
                   <button
@@ -122,6 +136,20 @@
               <StatusBadge :status="appt.estado" />
             </div>
             <div class="flex gap-3 mt-3">
+              <template v-if="appt.estado === 'Programada'">
+                <button
+                  type="button"
+                  class="btn-sm text-xs font-medium text-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  :disabled="statusLoading[appt.id]"
+                  @click="markAttendance(appt, 'Atendida')"
+                >{{ statusLoading[appt.id] ? 'Guardando...' : 'Asistió' }}</button>
+                <button
+                  type="button"
+                  class="btn-sm text-xs font-medium text-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  :disabled="statusLoading[appt.id]"
+                  @click="markAttendance(appt, 'No asistió')"
+                >No asistió</button>
+              </template>
               <RouterLink :to="`/appointments/${appt.id}`" class="btn-secondary btn-sm text-xs">Ver</RouterLink>
               <RouterLink :to="`/appointments/${appt.id}/edit`" class="btn-secondary btn-sm text-xs">Editar</RouterLink>
               <button
@@ -206,6 +234,7 @@ const filterPatientId = ref(0)
 const patientSearch = ref('')
 const patients = ref<Patient[]>([])
 const showPatientResults = ref(false)
+const statusLoading = ref<Record<number, boolean>>({})
 const currentPage = ref(1)
 const pageSize = 5
 const appointments = computed(() => {
@@ -343,6 +372,20 @@ function clearPatientFilter() {
   patientSearch.value = ''
   showPatientResults.value = false
   loadAppointments()
+}
+
+async function markAttendance(appointment: Appointment, status: 'Atendida' | 'No asistió') {
+  statusLoading.value[appointment.id] = true
+  try {
+    const response = await appointmentsService.changeStatus(appointment.id, status)
+    appointment.estado = response.data.estado
+    success(status === 'Atendida' ? 'Cita marcada como atendida' : 'Cita marcada como no asistida')
+  } catch (err: unknown) {
+    const e = err as { response?: { data?: { message?: string } } }
+    error(e.response?.data?.message || 'No se pudo actualizar el estado de la cita')
+  } finally {
+    statusLoading.value[appointment.id] = false
+  }
 }
 
 function goToPage(page: number) {
