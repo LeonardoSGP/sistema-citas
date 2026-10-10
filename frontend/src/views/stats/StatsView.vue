@@ -95,6 +95,25 @@
           </div>
         </div>
       </div>
+
+      <div class="card border-rose-100 bg-fuchsia-50/80">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="font-semibold text-primary-900">Pacientes atendidos</h3>
+          <span class="text-sm font-medium text-primary-700">{{ stats.totalPatients }}</span>
+        </div>
+        <p v-if="!stats.attendedPatients.length" class="text-sm text-rose-700">
+          No hay pacientes atendidos en este periodo.
+        </p>
+        <div v-else class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            v-for="patient in stats.attendedPatients"
+            :key="patient.id"
+            class="rounded-xl border border-rose-100 bg-rose-50/70 px-3 py-2 text-sm text-rose-900"
+          >
+            {{ patient.nombre }}
+          </div>
+        </div>
+      </div>
     </template>
   </div>
 </template>

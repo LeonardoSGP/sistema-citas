@@ -246,10 +246,14 @@ export const appointmentsService = {
       include: { patient: { select: { id: true, nombre: true, sexo: true, edad: true } } },
     });
 
-    const patientMap = new Map<number, { sexo: string; edad: number }>();
+    const patientMap = new Map<number, { nombre: string; sexo: string; edad: number }>();
     for (const appt of appointments) {
       if (appt.patient && !patientMap.has(appt.patient.id)) {
-        patientMap.set(appt.patient.id, { sexo: appt.patient.sexo, edad: appt.patient.edad });
+        patientMap.set(appt.patient.id, {
+          nombre: appt.patient.nombre,
+          sexo: appt.patient.sexo,
+          edad: appt.patient.edad,
+        });
       }
     }
 
@@ -287,6 +291,9 @@ export const appointmentsService = {
       endDate: end.toISOString(),
       totalAppointments: appointments.length,
       totalPatients: patientMap.size,
+      attendedPatients: Array.from(patientMap.entries())
+        .map(([id, { nombre }]) => ({ id, nombre }))
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
       gender: { hombres, mujeres, otros },
       ageRanges,
     };
