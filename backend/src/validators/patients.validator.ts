@@ -4,7 +4,7 @@ export const createPatientSchema = z.object({
   expediente: z
     .string()
     .trim()
-    .refine((value) => !value || /^\d{4}$/.test(value), 'El expediente debe contener 4 dígitos si se proporciona')
+    .refine((value) => !value || /^\d{3,4}$/.test(value), 'El expediente debe contener 3 o 4 dígitos si se proporciona')
     .transform((value) => value || null),
   nombre: z.string().min(1, 'El nombre es obligatorio').max(255),
   telefono: z
@@ -22,7 +22,7 @@ export const updatePatientSchema = z.object({
   expediente: z
     .string()
     .trim()
-    .refine((value) => !value || /^\d{4}$/.test(value), 'El expediente debe contener 4 dígitos si se proporciona')
+    .refine((value) => !value || /^\d{3,4}$/.test(value), 'El expediente debe contener 3 o 4 dígitos si se proporciona')
     .transform((value) => value || null)
     .optional(),
   nombre: z.string().min(1).max(255).optional(),

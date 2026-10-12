@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { patientsService } from '../services/patients.service';
 import { sendSuccess, sendError } from '../utils/response';
 import { AuthRequest } from '../types';
@@ -47,6 +48,10 @@ export const patientsController = {
       const patient = await patientsService.create(req.body);
       sendSuccess(res, patient, 'Paciente registrado correctamente', 201);
     } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        sendError(res, 'Ese número de expediente ya está registrado. Usa otro o deja el campo vacío.', 409);
+        return;
+      }
       const msg = (error as Error).message;
       sendError(res, msg, msg.includes('expediente') ? 409 : 500);
     }
@@ -56,6 +61,10 @@ export const patientsController = {
       const patient = await patientsService.update(Number(req.params.id), req.body);
       sendSuccess(res, patient, 'Paciente actualizado correctamente');
     } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        sendError(res, 'Ese número de expediente ya está registrado. Usa otro o deja el campo vacío.', 409);
+        return;
+      }
       const msg = (error as Error).message;
       sendError(res, msg, msg.includes('expediente') ? 409 : 500);
     }

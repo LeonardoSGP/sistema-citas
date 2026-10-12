@@ -18,7 +18,7 @@
         <div>
           <label class="label text-rose-900">Número de Expediente <span class="font-normal text-rose-500">(opcional)</span></label>
           <input v-model="form.expediente" type="text" class="input-field"
-            :class="{ 'border-red-500 ring-4 ring-red-50': errors.expediente }" placeholder="0001"
+            :class="{ 'border-red-500 ring-4 ring-red-50': errors.expediente }" placeholder="001 o 0001"
             maxlength="4" @input="onExpedienteInput" />
           <p v-if="errors.expediente" class="mt-1 text-xs text-red-500">{{ errors.expediente }}</p>
         </div>
@@ -107,8 +107,8 @@ function validate() {
   errors.edad = ''
   errors.sexo = ''
 
-  if (form.expediente.trim() && !/^\d{4}$/.test(form.expediente)) {
-    errors.expediente = 'El expediente debe tener 4 dígitos numéricos'; valid = false
+  if (form.expediente.trim() && !/^\d{3,4}$/.test(form.expediente)) {
+    errors.expediente = 'El expediente debe tener 3 o 4 dígitos numéricos'; valid = false
   }
   if (!form.nombre.trim()) { errors.nombre = 'El nombre es obligatorio'; valid = false }
   if (form.telefono.trim() && !/^\d{10}$/.test(form.telefono)) {
