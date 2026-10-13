@@ -5,18 +5,21 @@ import type { User } from '../types'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const token = ref<string | null>(localStorage.getItem('token'))
+  const token = ref<string | null>(localStorage.getItem('token') || sessionStorage.getItem('token'))
   const loading = ref(false)
 
   const isAuthenticated = computed(() => !!token.value)
 
-  async function login(email: string, password: string) {
+  async function login(email: string, password: string, rememberMe: boolean) {
     loading.value = true
     try {
-      const response = await authService.login(email, password)
+      const response = await authService.login(email, password, rememberMe)
       token.value = response.data.token
       user.value = response.data.user
-      localStorage.setItem('token', response.data.token)
+      localStorage.removeItem('token')
+      sessionStorage.removeItem('token')
+      const storage = rememberMe ? localStorage : sessionStorage
+      storage.setItem('token', response.data.token)
     } finally {
       loading.value = false
     }
@@ -41,6 +44,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     token.value = null
     localStorage.removeItem('token')
+    sessionStorage.removeItem('token')
   }
 
   return { user, token, loading, isAuthenticated, login, fetchProfile, setUser, logout }

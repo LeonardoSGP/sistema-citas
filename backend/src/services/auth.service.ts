@@ -4,7 +4,7 @@ import prisma from '../config/database';
 import { config } from '../config/env';
 
 export const authService = {
-  async login(email: string, password: string) {
+  async login(email: string, password: string, rememberMe = false) {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       throw new Error('Credenciales inválidas');
@@ -16,7 +16,7 @@ export const authService = {
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       config.jwtSecret,
-      { expiresIn: '8h' }
+      { expiresIn: rememberMe ? '30d' : '8h' }
     );
     return {
       token,

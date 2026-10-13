@@ -6,8 +6,8 @@ import { AuthRequest } from '../types';
 export const authController = {
   async login(req: Request, res: Response): Promise<void> {
     try {
-      const { email, password } = req.body;
-      const result = await authService.login(email, password);
+      const { email, password, rememberMe } = req.body;
+      const result = await authService.login(email, password, rememberMe === true);
       sendSuccess(res, result, 'Login exitoso');
     } catch (error) {
       sendError(res, (error as Error).message, 401);

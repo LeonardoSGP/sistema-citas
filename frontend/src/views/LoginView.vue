@@ -54,6 +54,11 @@
             </div>
           </div>
 
+          <label class="flex items-center gap-2 text-sm text-slate-600">
+            <input v-model="rememberMe" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" />
+            Mantener sesión iniciada en este dispositivo
+          </label>
+
           <div v-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-3">
             <p class="text-red-700 text-sm">{{ errorMessage }}</p>
           </div>
@@ -77,6 +82,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const form = reactive({ email: '', password: '' })
+const rememberMe = ref(false)
 const showPassword = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
@@ -85,7 +91,7 @@ async function handleLogin() {
   loading.value = true
   errorMessage.value = ''
   try {
-    await authStore.login(form.email, form.password)
+    await authStore.login(form.email, form.password, rememberMe.value)
     router.push('/dashboard')
   } catch (err: unknown) {
     const error = err as { response?: { data?: { message?: string } } }
