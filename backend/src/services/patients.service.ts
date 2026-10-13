@@ -73,21 +73,28 @@ export const patientsService = {
   },
 
   async create(data: { expediente: string | null; nombre: string; telefono: string | null; edad: number; sexo: string }) {
-    const existing = data.expediente
-      ? await prisma.patient.findUnique({ where: { expediente: data.expediente } })
+    const expediente = data.expediente?.trim() || null;
+    const telefono = data.telefono?.trim() || null;
+    const existing = expediente
+      ? await prisma.patient.findUnique({ where: { expediente } })
       : null;
     if (existing) throw new Error('Ya existe un paciente con ese número de expediente');
-    return prisma.patient.create({ data });
+    return prisma.patient.create({ data: { ...data, expediente, telefono } });
   },
 
   async update(id: number, data: Partial<{ expediente: string | null; nombre: string; telefono: string | null; edad: number; sexo: string }>) {
-    if (data.expediente) {
+    const normalizedData = {
+      ...data,
+      ...(data.expediente !== undefined ? { expediente: data.expediente?.trim() || null } : {}),
+      ...(data.telefono !== undefined ? { telefono: data.telefono?.trim() || null } : {}),
+    };
+    if (normalizedData.expediente) {
       const existing = await prisma.patient.findFirst({
-        where: { expediente: data.expediente, NOT: { id } },
+        where: { expediente: normalizedData.expediente, NOT: { id } },
       });
       if (existing) throw new Error('Ya existe un paciente con ese número de expediente');
     }
-    return prisma.patient.update({ where: { id }, data });
+    return prisma.patient.update({ where: { id }, data: normalizedData });
   },
 
   async getCount() {
