@@ -16,10 +16,41 @@
       <form @submit.prevent="handleSubmit" class="space-y-6">
         <div>
           <label class="label text-rose-900">Paciente</label>
-          <select v-model.number="form.patientId" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.patientId}">
-            <option :value="0">Seleccionar paciente...</option>
-            <option v-for="p in patients" :key="p.id" :value="p.id">{{ p.nombre }} ({{ p.expediente }})</option>
-          </select>
+          <div class="relative">
+            <input
+              v-model="patientSearch"
+              type="search"
+              class="input-field"
+              :class="{'border-red-500 ring-4 ring-red-50': errors.patientId}"
+              placeholder="Escribe el nombre del paciente"
+              autocomplete="off"
+              @focus="showPatientResults = true"
+              @input="handlePatientSearch"
+            />
+            <div
+              v-if="showPatientResults && patientSearch.trim()"
+              class="absolute z-20 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-rose-200 bg-white shadow-lg"
+            >
+              <button
+                v-for="patient in filteredPatients"
+                :key="patient.id"
+                type="button"
+                class="block w-full border-b border-rose-100 px-4 py-3 text-left last:border-0 hover:bg-rose-50"
+                @mousedown.prevent="selectPatient(patient)"
+              >
+                <span class="block text-sm font-medium text-primary-900">{{ patient.nombre }}</span>
+                <span class="block text-xs text-rose-600">
+                  Exp. {{ patient.expediente || 'Sin expediente' }} · {{ patient.edad }} años
+                </span>
+              </button>
+              <p v-if="!filteredPatients.length" class="px-4 py-3 text-sm text-rose-700">
+                No se encontró ese paciente.
+              </p>
+            </div>
+          </div>
+          <p v-if="form.patientId && selectedPatient" class="mt-1 text-xs text-emerald-700">
+            Paciente seleccionado: {{ selectedPatient.nombre }}
+          </p>
           <p v-if="errors.patientId" class="text-red-500 text-xs mt-1">{{ errors.patientId }}</p>
         </div>
 
@@ -96,6 +127,24 @@ const isEdit = computed(() => !!route.params.id)
 const loading = ref(false)
 const serverError = ref('')
 const patients = ref<Patient[]>([])
+const patientSearch = ref('')
+const showPatientResults = ref(false)
+
+const filteredPatients = computed(() => {
+  const query = patientSearch.value.trim().toLocaleLowerCase('es')
+  if (!query) return []
+  return patients.value
+    .filter((patient) =>
+      patient.nombre.toLocaleLowerCase('es').includes(query) ||
+      (patient.expediente || '').includes(query) ||
+      (patient.telefono || '').includes(query)
+    )
+    .slice(0, 10)
+})
+
+const selectedPatient = computed(() =>
+  patients.value.find((patient) => patient.id === form.patientId) || null
+)
 
 const form = reactive({
   patientId: 0,
@@ -126,6 +175,7 @@ function validate() {
     errors.fecha = 'La fecha es obligatoria'; valid = false
   } else {
   }
+
   if (!form.horaInicio) { errors.horaInicio = 'La hora de inicio es obligatoria'; valid = false }
   if (!form.horaFin) { errors.horaFin = 'La hora de fin es obligatoria'; valid = false }
   if (form.horaInicio && form.horaInicio < '08:00') {
@@ -141,6 +191,19 @@ function validate() {
     valid = false
   }
   return valid
+}
+
+function handlePatientSearch() {
+  form.patientId = 0
+  showPatientResults.value = true
+  errors.patientId = ''
+}
+
+function selectPatient(patient: Patient) {
+  form.patientId = patient.id
+  patientSearch.value = patient.nombre
+  showPatientResults.value = false
+  errors.patientId = ''
 }
 
 async function handleSubmit() {
@@ -171,12 +234,18 @@ onMounted(async () => {
     patients.value = pResponse.data
 
     // Pre-select patient if passed via query
-    if (route.query.patientId) form.patientId = Number(route.query.patientId)
+    if (route.query.patientId) {
+      form.patientId = Number(route.query.patientId)
+      const patient = patients.value.find((item) => item.id === form.patientId)
+      if (patient) patientSearch.value = patient.nombre
+    }
 
     if (isEdit.value) {
       const aResponse = await appointmentsService.getById(Number(route.params.id))
       const appt = aResponse.data
       form.patientId = appt.patientId
+      const patient = patients.value.find((item) => item.id === form.patientId)
+      if (patient) patientSearch.value = patient.nombre
       form.fecha = appt.fecha.substring(0, 10)
       form.horaInicio = typeof appt.horaInicio === 'string' ? appt.horaInicio.substring(11, 16) : ''
       form.horaFin = typeof appt.horaFin === 'string' ? appt.horaFin.substring(11, 16) : ''
