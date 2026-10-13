@@ -71,7 +71,13 @@
     <div class="card overflow-hidden border-rose-100 bg-fuchsia-50/80 p-0 shadow-[0_10px_35px_-12px_rgba(225,29,72,0.25)]">
       <LoadingSpinner v-if="loading" />
       <EmptyState v-else-if="!appointments.length" title="Sin citas" description="No hay citas que mostrar" >
-        <RouterLink to="/appointments/new" class="btn-primary">Crear primera cita</RouterLink>
+        <RouterLink
+          :to="{
+            path: '/appointments/new',
+            query: filterPatientId ? { patientId: String(filterPatientId) } : undefined,
+          }"
+          class="btn-primary"
+        >Crear primera cita</RouterLink>
       </EmptyState>
       <div v-else>
         <!-- Desktop -->
