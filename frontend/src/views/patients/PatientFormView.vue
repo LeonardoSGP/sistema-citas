@@ -41,7 +41,8 @@
         <div>
           <label class="label text-rose-900">Edad</label>
           <input v-model.number="form.edad" type="number" min="0" max="150" class="input-field"
-            :class="{ 'border-red-500 ring-4 ring-red-50': errors.edad }" placeholder="25" />
+            :class="{ 'border-red-500 ring-4 ring-red-50': errors.edad }" placeholder="0"
+            @input="onEdadInput" />
           <p v-if="errors.edad" class="mt-1 text-xs text-red-500">{{ errors.edad }}</p>
         </div>
 
@@ -97,6 +98,11 @@ function onExpedienteInput(e: Event) {
 function onTelefonoInput(e: Event) {
   const input = e.target as HTMLInputElement
   form.telefono = input.value.replace(/\D/g, '').slice(0, 10)
+}
+
+function onEdadInput(e: Event) {
+  const input = e.target as HTMLInputElement
+  form.edad = input.value === '' ? 0 : Number(input.value)
 }
 
 function validate() {

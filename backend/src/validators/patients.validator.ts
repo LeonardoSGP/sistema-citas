@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+const requiredAge = z.preprocess(
+  (value) => value === '' || value === null || value === undefined ? 0 : value,
+  z.number().int().min(0, 'La edad debe ser mayor o igual a 0').max(150)
+);
+
+const optionalAge = z.preprocess(
+  (value) => value === '' || value === null ? 0 : value,
+  z.number().int().min(0).max(150).optional()
+);
+
 export const createPatientSchema = z.object({
   expediente: z
     .string()
@@ -12,7 +22,7 @@ export const createPatientSchema = z.object({
     .trim()
     .refine((value) => !value || /^\d{10}$/.test(value), 'El teléfono debe contener 10 dígitos si se proporciona')
     .transform((value) => value || null),
-  edad: z.number().int().min(0, 'La edad debe ser mayor o igual a 0').max(150),
+  edad: requiredAge,
   sexo: z.enum(['Masculino', 'Femenino', 'Otro'], {
     errorMap: () => ({ message: 'El sexo debe ser Masculino, Femenino u Otro' }),
   }),
@@ -32,6 +42,6 @@ export const updatePatientSchema = z.object({
     .refine((value) => !value || /^\d{10}$/.test(value), 'El teléfono debe contener 10 dígitos si se proporciona')
     .transform((value) => value || null)
     .optional(),
-  edad: z.number().int().min(0).max(150).optional(),
+  edad: optionalAge,
   sexo: z.enum(['Masculino', 'Femenino', 'Otro']).optional(),
 });
