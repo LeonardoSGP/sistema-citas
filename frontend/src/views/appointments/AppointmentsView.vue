@@ -194,7 +194,7 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="label">Hora inicio</label>
-                <input v-model="rescheduleForm.horaInicio" type="time" min="08:00" max="14:00" class="input-field" />
+                <input v-model="rescheduleForm.horaInicio" type="time" min="08:00" max="14:00" class="input-field" @change="setRescheduleEndTime" />
               </div>
               <div>
                 <label class="label">Hora fin</label>
@@ -279,6 +279,13 @@ function openReschedule(appt: Appointment) {
 function closeReschedule() {
   showRescheduleModal.value = false
   rescheduleAppt.value = null
+}
+
+function setRescheduleEndTime() {
+  if (!rescheduleForm.value.horaInicio) return
+  const [hours, minutes] = rescheduleForm.value.horaInicio.split(':').map(Number)
+  const endHours = Math.min(hours + 1, 14)
+  rescheduleForm.value.horaFin = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
 async function submitReschedule() {

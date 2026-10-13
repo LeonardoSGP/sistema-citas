@@ -64,7 +64,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="label text-rose-900">Hora inicio</label>
-            <input v-model="form.horaInicio" type="time" min="08:00" max="14:00" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaInicio}" />
+            <input v-model="form.horaInicio" type="time" min="08:00" max="14:00" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaInicio}" @change="setEndTimeFromStart" />
             <p v-if="errors.horaInicio" class="text-red-500 text-xs mt-1">{{ errors.horaInicio }}</p>
           </div>
           <div>
@@ -162,6 +162,13 @@ const errors = reactive({
   horaInicio: '',
   horaFin: '',
 })
+
+function setEndTimeFromStart() {
+  if (!form.horaInicio) return
+  const [hours, minutes] = form.horaInicio.split(':').map(Number)
+  const endHours = Math.min(hours + 1, 14)
+  form.horaFin = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+}
 
 function validate() {
   let valid = true
