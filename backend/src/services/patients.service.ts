@@ -64,7 +64,7 @@ export const patientsService = {
     const patient = await prisma.patient.findUnique({
       where: { id },
       include: {
-        appointments: { orderBy: { fecha: 'desc' } },
+        appointments: { orderBy: [{ fecha: 'asc' }, { horaInicio: 'asc' }] },
         sessionNotes: { orderBy: { fecha: 'desc' } },
       },
     });
