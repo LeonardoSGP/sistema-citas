@@ -113,11 +113,11 @@ function validate() {
   errors.edad = ''
   errors.sexo = ''
 
-  if (form.expediente.trim() && !/^\d{3,4}$/.test(form.expediente)) {
+  if ((form.expediente || '').trim() && !/^\d{3,4}$/.test(form.expediente)) {
     errors.expediente = 'El expediente debe tener 3 o 4 dígitos numéricos'; valid = false
   }
   if (!form.nombre.trim()) { errors.nombre = 'El nombre es obligatorio'; valid = false }
-  if (form.telefono.trim() && !/^\d{10}$/.test(form.telefono)) {
+  if ((form.telefono || '').trim() && !/^\d{10}$/.test(form.telefono)) {
     errors.telefono = 'El teléfono debe tener 10 dígitos numéricos'; valid = false
   }
   if (form.edad < 0 || form.edad > 150) { errors.edad = 'La edad debe ser entre 0 y 150'; valid = false }
@@ -152,9 +152,9 @@ onMounted(async () => {
     try {
       const response = await patientsService.getById(Number(route.params.id))
       Object.assign(form, {
-        expediente: response.data.expediente,
+        expediente: response.data.expediente || '',
         nombre: response.data.nombre,
-        telefono: response.data.telefono,
+        telefono: response.data.telefono || '',
         edad: response.data.edad,
         sexo: response.data.sexo,
       })
