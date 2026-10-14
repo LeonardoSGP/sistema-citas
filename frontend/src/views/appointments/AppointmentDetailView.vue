@@ -89,12 +89,50 @@
           </div>
         </div>
 
-        <RouterLink
-          :to="`/patients/${appointment.patientId}/edit`"
+        <button
+          type="button"
           class="btn-primary mt-5 flex w-full justify-center"
+          @click="startPatientEdit"
         >
           Editar paciente
-        </RouterLink>
+        </button>
+        <form v-if="editingPatient" class="mt-4 space-y-3 border-t border-rose-200 pt-4" @submit.prevent="savePatient">
+          <div>
+            <label class="label text-rose-900">Nombre completo</label>
+            <input v-model="patientForm.nombre" type="text" class="input-field" required />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="label text-rose-900">Expediente</label>
+              <input v-model="patientForm.expediente" type="text" maxlength="4" class="input-field" placeholder="001 o 0001" />
+            </div>
+            <div>
+              <label class="label text-rose-900">Teléfono</label>
+              <input v-model="patientForm.telefono" type="tel" maxlength="10" class="input-field" placeholder="10 dígitos" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="label text-rose-900">Edad</label>
+              <input v-model.number="patientForm.edad" type="number" min="0" max="150" class="input-field" />
+            </div>
+            <div>
+              <label class="label text-rose-900">Sexo</label>
+              <select v-model="patientForm.sexo" class="input-field">
+                <option value="Femenino">Femenino</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <p v-if="patientError" class="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">{{ patientError }}</p>
+          <div class="flex gap-2">
+            <button type="button" class="btn-secondary flex-1" :disabled="patientSaving" @click="editingPatient = false">Cancelar</button>
+            <button type="submit" class="btn-primary flex-1" :disabled="patientSaving">
+              {{ patientSaving ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </form>
         <RouterLink
           :to="`/patients/${appointment.patientId}/expediente`"
           class="btn-secondary mt-2 flex w-full justify-center"
@@ -124,7 +162,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { appointmentsService } from '../../services/appointments.service'
-import type { Appointment, AppointmentStatus } from '../../types'
+import { patientsService } from '../../services/patients.service'
+import type { Appointment, AppointmentStatus, Patient } from '../../types'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
@@ -138,7 +177,67 @@ const { success, error } = useNotification()
 
 const appointment = ref<Appointment | null>(null)
 const loading = ref(true)
+const editingPatient = ref(false)
+const patientSaving = ref(false)
+const patientError = ref('')
+const patientForm = ref({
+  expediente: '',
+  nombre: '',
+  telefono: '',
+  edad: 0,
+  sexo: 'Otro',
+})
 const statuses: AppointmentStatus[] = ['Programada', 'Atendida', 'No asistió']
+
+function startPatientEdit() {
+  if (!appointment.value?.patient) return
+  const patient = appointment.value.patient
+  patientForm.value = {
+    expediente: patient.expediente || '',
+    nombre: patient.nombre,
+    telefono: patient.telefono || '',
+    edad: patient.edad ?? 0,
+    sexo: patient.sexo || 'Otro',
+  }
+  patientError.value = ''
+  editingPatient.value = true
+}
+
+async function savePatient() {
+  if (!appointment.value?.patient) return
+  const expediente = patientForm.value.expediente.trim()
+  const telefono = patientForm.value.telefono.trim()
+  if (!patientForm.value.nombre.trim()) {
+    patientError.value = 'El nombre es obligatorio'
+    return
+  }
+  if (expediente && !/^\d{3,4}$/.test(expediente)) {
+    patientError.value = 'El expediente debe tener 3 o 4 dígitos'
+    return
+  }
+  if (telefono && !/^\d{10}$/.test(telefono)) {
+    patientError.value = 'El teléfono debe tener 10 dígitos'
+    return
+  }
+  patientSaving.value = true
+  patientError.value = ''
+  try {
+    const response = await patientsService.update(appointment.value.patientId, {
+      ...patientForm.value,
+      expediente,
+      telefono,
+      nombre: patientForm.value.nombre.trim(),
+    })
+    appointment.value.patient = response.data as Patient
+    editingPatient.value = false
+    success('Paciente actualizado correctamente')
+  } catch (err: unknown) {
+    const e = err as { response?: { data?: { message?: string } } }
+    patientError.value = e.response?.data?.message || 'No se pudo actualizar el paciente'
+  } finally {
+    patientSaving.value = false
+  }
+}
 
 async function changeStatus(estado: AppointmentStatus) {
   try {
