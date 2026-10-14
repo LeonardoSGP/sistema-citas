@@ -83,7 +83,7 @@
               <th class="w-[23%] px-3 py-3 text-left text-xs font-semibold uppercase text-primary-800">Paciente</th>
               <th class="w-[15%] px-3 py-3 text-left text-xs font-semibold uppercase text-primary-800">Estado</th>
               <th class="w-[15%] px-3 py-3 text-left text-xs font-semibold uppercase text-primary-800">Motivo</th>
-              <th class="w-[16%] px-3 py-3 text-left text-xs font-semibold uppercase text-primary-800">Acciones</th>
+              <th class="w-[20%] px-3 py-3 text-left text-xs font-semibold uppercase text-primary-800">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-rose-100">
@@ -97,17 +97,21 @@
               <td class="px-3 py-3"><StatusBadge :status="appt.estado" /></td>
               <td class="truncate px-3 py-3 text-sm text-rose-800">{{ appt.motivo || '-' }}</td>
               <td class="px-3 py-3">
-                <div class="flex flex-wrap gap-x-2 gap-y-1">
+                <div class="flex flex-nowrap items-center gap-1">
                   <template v-if="appt.estado === 'Programada'">
                     <button
                       type="button"
-                      class="text-sm font-medium text-emerald-600 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      class="icon-action text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      title="Marcar como asistió"
+                      aria-label="Marcar como asistió"
                       :disabled="statusLoading[appt.id]"
                       @click="markAttendance(appt, 'Atendida')"
                     ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6"/></svg></button>
                     <button
                       type="button"
-                      class="text-sm font-medium text-slate-500 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      class="icon-action text-slate-500 hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      title="Marcar como no asistió"
+                      aria-label="Marcar como no asistió"
                       :disabled="statusLoading[appt.id]"
                       @click="markAttendance(appt, 'No asistió')"
                     ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="m7 7 10 10M17 7 7 17"/></svg></button>
@@ -121,7 +125,9 @@
                   <button
                     v-if="appt.estado === 'Programada'"
                     @click="openReschedule(appt)"
-                    class="text-sm text-amber-600 hover:text-amber-700"
+                    class="icon-action text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                    title="Reprogramar cita"
+                    aria-label="Reprogramar cita"
                   ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z"/><path stroke-linecap="round" d="M12 12v3l2 1"/></svg></button>
                 </div>
               </td>
@@ -139,17 +145,21 @@
               </div>
               <StatusBadge :status="appt.estado" />
             </div>
-            <div class="flex gap-3 mt-3">
+            <div class="flex items-center gap-1 mt-3">
               <template v-if="appt.estado === 'Programada'">
                 <button
                   type="button"
-                  class="btn-sm text-xs font-medium text-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  class="icon-action text-emerald-600 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  title="Marcar como asistió"
+                  aria-label="Marcar como asistió"
                   :disabled="statusLoading[appt.id]"
                   @click="markAttendance(appt, 'Atendida')"
                 ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6"/></svg></button>
                 <button
                   type="button"
-                  class="btn-sm text-xs font-medium text-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  class="icon-action text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  title="Marcar como no asistió"
+                  aria-label="Marcar como no asistió"
                   :disabled="statusLoading[appt.id]"
                   @click="markAttendance(appt, 'No asistió')"
                 ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="m7 7 10 10M17 7 7 17"/></svg></button>
@@ -163,7 +173,9 @@
               <button
                 v-if="appt.estado === 'Programada'"
                 @click="openReschedule(appt)"
-                class="btn-sm text-xs text-amber-600"
+                class="icon-action text-amber-600 hover:bg-amber-50"
+                title="Reprogramar cita"
+                aria-label="Reprogramar cita"
               ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z"/><path stroke-linecap="round" d="M12 12v3l2 1"/></svg></button>
             </div>
           </div>
