@@ -82,7 +82,6 @@
             <p class="text-xs font-semibold uppercase tracking-wide text-primary-600">Paciente</p>
             <h3 class="mt-1 text-xl font-semibold text-slate-900">{{ appointment.patient?.nombre }}</h3>
           </div>
-          <StatusBadge :status="appointment.patient?.activo ? 'Activo' : 'Inactivo'" />
         </div>
 
         <div class="grid grid-cols-2 gap-3 text-sm">
