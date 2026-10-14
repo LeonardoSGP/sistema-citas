@@ -209,14 +209,14 @@
               <div>
                 <label class="label">Hora inicio</label>
                 <select v-model="rescheduleForm.horaInicio" class="input-field" @change="setRescheduleEndTime">
-                  <option value="">Seleccionar hora...</option>
+                  <option value="">Elegir hora</option>
                   <option v-for="hour in appointmentStartHours" :key="hour" :value="hour">{{ hour }}</option>
                 </select>
               </div>
               <div>
                 <label class="label">Hora fin</label>
                 <select v-model="rescheduleForm.horaFin" class="input-field">
-                  <option value="">Seleccionar hora...</option>
+                  <option value="">Elegir hora</option>
                   <option v-for="hour in appointmentEndHours" :key="hour" :value="hour">{{ hour }}</option>
                 </select>
               </div>

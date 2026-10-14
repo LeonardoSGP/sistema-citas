@@ -65,7 +65,7 @@
           <div>
             <label class="label text-rose-900">Hora inicio</label>
             <select v-model="form.horaInicio" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaInicio}" @change="setEndTimeFromStart">
-              <option value="">Seleccionar hora...</option>
+              <option value="">Elegir hora</option>
               <option v-for="hour in startHours" :key="hour" :value="hour">{{ hour }}</option>
             </select>
             <p v-if="errors.horaInicio" class="text-red-500 text-xs mt-1">{{ errors.horaInicio }}</p>
@@ -73,7 +73,7 @@
           <div>
             <label class="label text-rose-900">Hora fin</label>
             <select v-model="form.horaFin" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaFin}">
-              <option value="">Seleccionar hora...</option>
+              <option value="">Elegir hora</option>
               <option v-for="hour in endHours" :key="hour" :value="hour">{{ hour }}</option>
             </select>
             <p v-if="errors.horaFin" class="text-red-500 text-xs mt-1">{{ errors.horaFin }}</p>
