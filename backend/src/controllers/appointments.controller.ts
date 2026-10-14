@@ -56,7 +56,7 @@ export const appointmentsController = {
         return;
       }
       const msg = (error as Error).message;
-      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') || msg.includes('horas completas') ? 400 : 500;
+      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') || msg.includes('última hora') || msg.includes('horas completas') ? 400 : 500;
       sendError(res, msg, status);
     }
   },
@@ -69,7 +69,7 @@ export const appointmentsController = {
         return;
       }
       const msg = (error as Error).message;
-      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') || msg.includes('horas completas') ? 400 : 500;
+      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') || msg.includes('última hora') || msg.includes('horas completas') ? 400 : 500;
       sendError(res, msg, status);
     }
   },
@@ -83,7 +83,7 @@ export const appointmentsController = {
         return;
       }
       const msg = (error as Error).message;
-      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') || msg.includes('horas completas') ? 400 : 500;
+      const status = msg.includes('horario') || msg.includes('existe') ? 409 : msg.includes('pasadas') || msg.includes('08:00') || msg.includes('14:00') || msg.includes('última hora') || msg.includes('horas completas') ? 400 : 500;
       sendError(res, msg, status);
     }
   },

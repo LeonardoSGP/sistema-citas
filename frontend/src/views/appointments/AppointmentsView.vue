@@ -190,14 +190,14 @@
                 <label class="label">Hora inicio</label>
                 <select v-model="rescheduleForm.horaInicio" class="input-field" @change="setRescheduleEndTime">
                   <option value="">Seleccionar hora...</option>
-                  <option v-for="hour in appointmentHours" :key="hour" :value="hour">{{ hour }}</option>
+                  <option v-for="hour in appointmentStartHours" :key="hour" :value="hour">{{ hour }}</option>
                 </select>
               </div>
               <div>
                 <label class="label">Hora fin</label>
                 <select v-model="rescheduleForm.horaFin" class="input-field">
                   <option value="">Seleccionar hora...</option>
-                  <option v-for="hour in appointmentHours" :key="hour" :value="hour">{{ hour }}</option>
+                  <option v-for="hour in appointmentEndHours" :key="hour" :value="hour">{{ hour }}</option>
                 </select>
               </div>
             </div>
@@ -286,7 +286,8 @@ const rescheduleAppt = ref<Appointment | null>(null)
 const rescheduleLoading = ref(false)
 const rescheduleError = ref('')
 const rescheduleForm = ref({ fecha: '', horaInicio: '', horaFin: '' })
-const appointmentHours = Array.from({ length: 7 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
+const appointmentStartHours = Array.from({ length: 6 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
+const appointmentEndHours = Array.from({ length: 7 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
 
 function openReschedule(appt: Appointment) {
   rescheduleAppt.value = appt

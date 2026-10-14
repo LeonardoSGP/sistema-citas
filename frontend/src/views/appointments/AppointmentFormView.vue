@@ -138,7 +138,7 @@ const serverError = ref('')
 const patients = ref<Patient[]>([])
 const patientSearch = ref('')
 const showPatientResults = ref(false)
-const startHours = Array.from({ length: 7 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
+const startHours = Array.from({ length: 6 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
 const endHours = Array.from({ length: 7 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
 
 const filteredPatients = computed(() => {

@@ -30,6 +30,9 @@ function validateBusinessHours(horaInicio: string, horaFin: string) {
   if (horaInicio < OPENING_TIME) {
     throw new Error('Las citas deben iniciar a partir de las 08:00');
   }
+  if (horaInicio >= CLOSING_TIME) {
+    throw new Error('La última hora de inicio disponible es a las 13:00');
+  }
   if (horaFin > CLOSING_TIME) {
     throw new Error('Las citas deben terminar a más tardar a las 14:00');
   }
