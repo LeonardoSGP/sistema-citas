@@ -13,6 +13,7 @@
 
     <template v-else-if="appointment">
       <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
+      <div class="space-y-6">
       <div class="card">
         <div class="flex items-start justify-between mb-4">
           <div>
@@ -61,7 +62,21 @@
         </div>
       </div>
 
-      <aside class="card border-rose-100 bg-gradient-to-br from-rose-50 to-fuchsia-50 lg:sticky lg:top-6">
+      <!-- Session notes -->
+      <div class="card">
+        <h3 class="font-semibold text-slate-900 mb-4">Notas de sesión</h3>
+        <EmptyState v-if="!appointment.sessionNotes?.length" title="Sin notas" description="No hay notas de sesión para esta cita" />
+        <div v-else class="space-y-3">
+          <div v-for="note in appointment.sessionNotes" :key="note.id" class="p-4 bg-slate-50 rounded-lg">
+            <p class="text-sm font-medium text-slate-700 mb-1">{{ formatDate(note.fecha) }}</p>
+            <p v-if="note.motivo" class="text-sm text-slate-600">{{ note.motivo }}</p>
+            <p v-if="note.notas" class="text-sm text-slate-500 mt-1">{{ note.notas }}</p>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <aside class="card relative min-h-[420px] overflow-hidden border-rose-100 bg-gradient-to-br from-rose-50 to-fuchsia-50 lg:sticky lg:top-6">
         <div class="mb-5 flex items-start justify-between gap-3">
           <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-primary-600">Paciente</p>
@@ -96,7 +111,7 @@
         >
           Editar paciente
         </button>
-        <form v-if="editingPatient" class="mt-4 space-y-3 border-t border-rose-200 pt-4" @submit.prevent="savePatient">
+        <form v-if="editingPatient" class="absolute inset-0 z-10 space-y-3 overflow-y-auto rounded-2xl bg-gradient-to-br from-rose-50 to-fuchsia-50 p-5" @submit.prevent="savePatient">
           <div>
             <label class="label text-rose-900">Nombre completo</label>
             <input v-model="patientForm.nombre" type="text" class="input-field" required />
@@ -140,19 +155,6 @@
           Ver expediente
         </RouterLink>
       </aside>
-      </div>
-
-      <!-- Session notes -->
-      <div class="card lg:max-w-[calc(100%-21rem)]">
-        <h3 class="font-semibold text-slate-900 mb-4">Notas de sesión</h3>
-        <EmptyState v-if="!appointment.sessionNotes?.length" title="Sin notas" description="No hay notas de sesión para esta cita" />
-        <div v-else class="space-y-3">
-          <div v-for="note in appointment.sessionNotes" :key="note.id" class="p-4 bg-slate-50 rounded-lg">
-            <p class="text-sm font-medium text-slate-700 mb-1">{{ formatDate(note.fecha) }}</p>
-            <p v-if="note.motivo" class="text-sm text-slate-600">{{ note.motivo }}</p>
-            <p v-if="note.notas" class="text-sm text-slate-500 mt-1">{{ note.notas }}</p>
-          </div>
-        </div>
       </div>
     </template>
   </div>
