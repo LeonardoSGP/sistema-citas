@@ -25,9 +25,9 @@
         </select>
         <button v-if="filterSexo || filterEdad" @click="clearFilters" class="btn-secondary btn-sm whitespace-nowrap border-rose-200 bg-rose-50 text-primary-700 hover:bg-rose-100">Limpiar filtros</button>
       </div>
-      <RouterLink to="/patients/new" class="btn-primary whitespace-nowrap shadow-rose-200">
+      <button type="button" class="btn-primary whitespace-nowrap shadow-rose-200" @click="showNewPatient = true">
         + Nuevo Paciente
-      </RouterLink>
+      </button>
     </div>
 
     <div class="card overflow-hidden border-rose-100 bg-fuchsia-50/80 p-0 shadow-[0_10px_35px_-12px_rgba(225,29,72,0.25)]">
@@ -37,7 +37,7 @@
         title="Sin pacientes"
         description="No se encontraron pacientes registrados"
       >
-        <RouterLink to="/patients/new" class="btn-primary">Registrar primer paciente</RouterLink>
+        <button type="button" class="btn-primary" @click="showNewPatient = true">Registrar primer paciente</button>
       </EmptyState>
       <div v-else>
         <!-- Desktop table -->
@@ -122,6 +122,9 @@
       </div>
     </div>
   </div>
+  <FormModal v-model="showNewPatient">
+    <PatientFormView modal @close="showNewPatient = false" @saved="handlePatientSaved" />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
@@ -132,8 +135,11 @@ import type { Patient } from '../../types'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import { useNotification } from '../../composables/useNotification'
+import FormModal from '../../components/FormModal.vue'
+import PatientFormView from './PatientFormView.vue'
 
 const { error } = useNotification()
+const showNewPatient = ref(false)
 const patients = ref<Patient[]>([])
 const loading = ref(true)
 const search = ref('')
@@ -211,6 +217,12 @@ function goToPage(page: number) {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
   loadPatients()
+}
+
+async function handlePatientSaved() {
+  showNewPatient.value = false
+  currentPage.value = 1
+  await loadPatients()
 }
 
 onMounted(loadPatients)

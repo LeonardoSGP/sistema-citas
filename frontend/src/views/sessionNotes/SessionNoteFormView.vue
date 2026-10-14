@@ -70,8 +70,8 @@
         </div>
 
         <div class="flex flex-col-reverse justify-end gap-3 border-t border-rose-100 pt-5 sm:flex-row">
-          <button type="button" @click="router.back()" class="btn-secondary sm:min-w-32">Cancelar</button>
-          <button type="submit" class="btn-primary sm:min-w-40" :disabled="loading">
+          <button type="button" @click="cancelForm" class="btn-secondary btn-sm sm:min-w-28">Cancelar</button>
+          <button type="submit" class="btn-primary btn-sm sm:min-w-32" :disabled="loading">
             {{ loading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Guardar Nota') }}
           </button>
         </div>
@@ -94,6 +94,8 @@ const router = useRouter()
 const route = useRoute()
 const { success, error } = useNotification()
 const { formatShortDate, formatTime } = useFormatters()
+const props = defineProps<{ modal?: boolean; initialPatientId?: number; initialAppointmentId?: number }>()
+const emit = defineEmits<{ close: []; saved: [] }>()
 
 const isEdit = computed(() => !!route.params.id)
 const loading = ref(false)
@@ -142,12 +144,18 @@ async function handleSubmit() {
       await sessionNotesService.create(form)
       success('Nota guardada correctamente')
     }
-    router.back()
+    if (props.modal) emit('saved')
+    else router.back()
   } catch (err: unknown) {
     const e = err as { response?: { data?: { message?: string } } }
     serverError.value = e.response?.data?.message || 'Error al guardar la nota'
     error(serverError.value)
   } finally { loading.value = false }
+}
+
+function cancelForm() {
+  if (props.modal) emit('close')
+  else router.back()
 }
 
 onMounted(async () => {
@@ -156,12 +164,12 @@ onMounted(async () => {
     patients.value = pRes.data
 
     // Pre-fill from query params
-    if (route.query.patientId) {
-      form.patientId = Number(route.query.patientId)
+    if (props.initialPatientId || route.query.patientId) {
+      form.patientId = props.initialPatientId || Number(route.query.patientId)
       await loadPatientAppointments()
     }
-    if (route.query.appointmentId) {
-      form.appointmentId = Number(route.query.appointmentId)
+    if (props.initialAppointmentId || route.query.appointmentId) {
+      form.appointmentId = props.initialAppointmentId || Number(route.query.appointmentId)
     }
 
     if (isEdit.value) {

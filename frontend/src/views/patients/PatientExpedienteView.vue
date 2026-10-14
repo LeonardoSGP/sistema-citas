@@ -34,7 +34,7 @@
       <div class="card">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-slate-900">Historial de Citas</h3>
-          <RouterLink :to="{ path: '/appointments/new', query: { patientId: patient.id } }" class="btn-primary btn-sm text-sm">+ Nueva cita</RouterLink>
+          <button type="button" class="btn-primary btn-sm text-sm" @click="showNewAppointment = true">+ Nueva cita</button>
         </div>
         <EmptyState v-if="!patient.appointments?.length" title="Sin citas" description="No hay citas registradas para este paciente" />
         <div v-else class="space-y-2">
@@ -60,7 +60,7 @@
       <div class="card">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-slate-900">Notas de Sesión</h3>
-          <RouterLink :to="{ path: '/session-notes/new', query: { patientId: patient.id } }" class="btn-primary btn-sm text-sm">+ Nueva nota</RouterLink>
+          <button type="button" class="btn-primary btn-sm text-sm" @click="showNewNote = true">+ Nueva nota</button>
         </div>
         <EmptyState v-if="!patient.sessionNotes?.length" title="Sin notas" description="No hay notas de sesión registradas" />
         <div v-else class="space-y-3">
@@ -80,6 +80,12 @@
       </div>
     </template>
   </div>
+  <FormModal v-model="showNewAppointment">
+    <AppointmentFormView modal :initial-patient-id="patient?.id" @close="showNewAppointment = false" @saved="handleAppointmentSaved" />
+  </FormModal>
+  <FormModal v-model="showNewNote">
+    <SessionNoteFormView modal :initial-patient-id="patient?.id" @close="showNewNote = false" @saved="handleNoteSaved" />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
@@ -91,12 +97,17 @@ import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { useFormatters } from '../../composables/useFormatters'
+import FormModal from '../../components/FormModal.vue'
+import AppointmentFormView from '../appointments/AppointmentFormView.vue'
+import SessionNoteFormView from '../sessionNotes/SessionNoteFormView.vue'
 
 const router = useRouter()
 const route = useRoute()
 const { formatDate, formatShortDate, formatTime } = useFormatters()
 const patient = ref<Patient | null>(null)
 const loading = ref(true)
+const showNewAppointment = ref(false)
+const showNewNote = ref(false)
 
 onMounted(async () => {
   try {
@@ -108,4 +119,18 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+async function handleAppointmentSaved() {
+  showNewAppointment.value = false
+  if (!patient.value) return
+  const response = await patientsService.getExpediente(patient.value.id)
+  patient.value = response.data
+}
+
+async function handleNoteSaved() {
+  showNewNote.value = false
+  if (!patient.value) return
+  const response = await patientsService.getExpediente(patient.value.id)
+  patient.value = response.data
+}
 </script>

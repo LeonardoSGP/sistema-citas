@@ -63,8 +63,8 @@
         </div>
 
         <div class="flex flex-col-reverse justify-end gap-3 border-t border-rose-100 pt-5 sm:flex-row">
-          <button type="button" @click="router.back()" class="btn-secondary sm:min-w-32">Cancelar</button>
-          <button type="submit" class="btn-primary sm:min-w-40" :disabled="loading">
+          <button type="button" @click="cancelForm" class="btn-secondary btn-sm sm:min-w-28">Cancelar</button>
+          <button type="submit" class="btn-primary btn-sm sm:min-w-32" :disabled="loading">
             {{ loading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Registrar') }}
           </button>
         </div>
@@ -82,6 +82,8 @@ import { useNotification } from '../../composables/useNotification'
 const router = useRouter()
 const route = useRoute()
 const { success, error } = useNotification()
+const props = defineProps<{ modal?: boolean }>()
+const emit = defineEmits<{ close: []; saved: [] }>()
 
 const isEdit = computed(() => !!route.params.id)
 const loading = ref(false)
@@ -137,7 +139,8 @@ async function handleSubmit() {
       await patientsService.create(form)
       success('Paciente registrado correctamente')
     }
-    router.push('/patients')
+    if (props.modal) emit('saved')
+    else router.push('/patients')
   } catch (err: unknown) {
     const e = err as { response?: { data?: { message?: string } } }
     serverError.value = e.response?.data?.message || 'Error al guardar paciente'
@@ -145,6 +148,11 @@ async function handleSubmit() {
   } finally {
     loading.value = false
   }
+}
+
+function cancelForm() {
+  if (props.modal) emit('close')
+  else router.back()
 }
 
 onMounted(async () => {

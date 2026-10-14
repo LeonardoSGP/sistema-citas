@@ -58,7 +58,7 @@
 
         <div class="mt-4 flex gap-3">
           <RouterLink :to="`/appointments/${appointment.id}/edit`" class="btn-secondary">Editar cita</RouterLink>
-          <RouterLink :to="{ path: '/session-notes/new', query: { appointmentId: appointment.id, patientId: appointment.patientId } }" class="btn-primary">+ Nota de sesión</RouterLink>
+          <button type="button" class="btn-primary" @click="showNewNote = true">+ Nota de sesión</button>
         </div>
       </div>
 
@@ -142,8 +142,8 @@
           </div>
           <p v-if="patientError" class="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">{{ patientError }}</p>
           <div class="flex gap-2">
-            <button type="button" class="btn-secondary flex-1" :disabled="patientSaving" @click="editingPatient = false">Cancelar</button>
-            <button type="submit" class="btn-primary flex-1" :disabled="patientSaving">
+            <button type="button" class="btn-secondary btn-sm flex-1" :disabled="patientSaving" @click="editingPatient = false">Cancelar</button>
+            <button type="submit" class="btn-primary btn-sm flex-1" :disabled="patientSaving">
               {{ patientSaving ? 'Guardando...' : 'Guardar cambios' }}
             </button>
           </div>
@@ -158,6 +158,15 @@
       </div>
     </template>
   </div>
+  <FormModal v-model="showNewNote">
+    <SessionNoteFormView
+      modal
+      :initial-patient-id="appointment?.patientId"
+      :initial-appointment-id="appointment?.id"
+      @close="showNewNote = false"
+      @saved="handleNoteSaved"
+    />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
@@ -171,6 +180,8 @@ import EmptyState from '../../components/EmptyState.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { useFormatters } from '../../composables/useFormatters'
 import { useNotification } from '../../composables/useNotification'
+import FormModal from '../../components/FormModal.vue'
+import SessionNoteFormView from '../sessionNotes/SessionNoteFormView.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -189,6 +200,7 @@ const patientForm = ref({
   edad: 0,
   sexo: 'Otro',
 })
+const showNewNote = ref(false)
 const statuses: AppointmentStatus[] = ['Programada', 'Atendida', 'No asistió']
 
 function startPatientEdit() {
@@ -247,6 +259,10 @@ async function changeStatus(estado: AppointmentStatus) {
     if (appointment.value) appointment.value.estado = estado
     success('Estado actualizado')
   } catch { error('Error al cambiar estado') }
+}
+
+function handleNoteSaved() {
+  showNewNote.value = false
 }
 
 onMounted(async () => {

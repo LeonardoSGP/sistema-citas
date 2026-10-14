@@ -46,7 +46,7 @@
         <input v-model="filterFecha" type="date" class="input-field w-full border-rose-200 bg-rose-50/80 text-rose-950 sm:w-auto" @change="applyFilters" />
         <button v-if="filterEstado || filterFecha" @click="clearFilters" class="btn-secondary btn-sm border-rose-200 bg-rose-50 text-primary-700 hover:bg-rose-100">Limpiar</button>
       </div>
-      <RouterLink to="/appointments/new" class="btn-primary whitespace-nowrap">+ Nueva Cita</RouterLink>
+      <button type="button" class="btn-primary whitespace-nowrap" @click="openNewAppointment()">+ Nueva Cita</button>
     </div>
 
     <!-- Tabs -->
@@ -71,13 +71,7 @@
     <div class="card overflow-hidden border-rose-100 bg-fuchsia-50/80 p-0 shadow-[0_10px_35px_-12px_rgba(225,29,72,0.25)]">
       <LoadingSpinner v-if="loading" />
       <EmptyState v-else-if="!appointments.length" title="Sin citas" description="No hay citas que mostrar" >
-        <RouterLink
-          :to="{
-            path: '/appointments/new',
-            query: filterPatientId ? { patientId: String(filterPatientId) } : undefined,
-          }"
-          class="btn-primary"
-        >Crear primera cita</RouterLink>
+        <button type="button" class="btn-primary" @click="openNewAppointment(filterPatientId || undefined)">Crear primera cita</button>
       </EmptyState>
       <div v-else>
         <!-- Desktop -->
@@ -214,6 +208,14 @@
         </div>
       </div>
     </Teleport>
+    <FormModal v-model="showNewAppointment">
+      <AppointmentFormView
+        modal
+        :initial-patient-id="newAppointmentPatientId"
+        @close="showNewAppointment = false"
+        @saved="handleAppointmentSaved"
+      />
+    </FormModal>
   </div>
 </template>
 
@@ -228,9 +230,13 @@ import EmptyState from '../../components/EmptyState.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { useFormatters } from '../../composables/useFormatters'
 import { useNotification } from '../../composables/useNotification'
+import FormModal from '../../components/FormModal.vue'
+import AppointmentFormView from './AppointmentFormView.vue'
 
 const { formatShortDate, formatTime } = useFormatters()
 const { success, error } = useNotification()
+const showNewAppointment = ref(false)
+const newAppointmentPatientId = ref<number | undefined>()
 const allAppointments = ref<Appointment[]>([])
 const loading = ref(true)
 const activeTab = ref('all')
@@ -385,6 +391,16 @@ function clearPatientFilter() {
   patientSearch.value = ''
   showPatientResults.value = false
   loadAppointments()
+}
+
+function openNewAppointment(patientId?: number) {
+  newAppointmentPatientId.value = patientId
+  showNewAppointment.value = true
+}
+
+async function handleAppointmentSaved() {
+  showNewAppointment.value = false
+  await loadAppointments()
 }
 
 async function markAttendance(appointment: Appointment, status: 'Atendida' | 'No asistió') {

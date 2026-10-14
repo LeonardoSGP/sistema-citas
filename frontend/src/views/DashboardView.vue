@@ -95,12 +95,20 @@
             </div>
           </div>
         </div>
-        <RouterLink :to="{ path: '/appointments/new', query: { date: selectedDateStr } }" class="btn-primary w-full mt-8 py-2 text-sm justify-center">
+        <button type="button" class="btn-primary mt-8 w-full justify-center py-2 text-sm" @click="showNewAppointment = true">
           Agendar cita
-        </RouterLink>
+        </button>
       </div>
     </div>
   </div>
+  <FormModal v-model="showNewAppointment">
+    <AppointmentFormView
+      modal
+      :initial-date="selectedDateStr"
+      @close="showNewAppointment = false"
+      @saved="handleAppointmentSaved"
+    />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
@@ -114,6 +122,8 @@ import LoadingSpinner from '../components/LoadingSpinner.vue'
 import EmptyState from '../components/EmptyState.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import { useFormatters } from '../composables/useFormatters'
+import FormModal from '../components/FormModal.vue'
+import AppointmentFormView from './appointments/AppointmentFormView.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -124,6 +134,7 @@ const weekAppointments = ref<Appointment[]>([])
 const monthAppointments = ref<Appointment[]>([])
 const totalPatients = ref(0)
 const loadingMonth = ref(true)
+const showNewAppointment = ref(false)
 
 const currentDate = ref(new Date())
 const getLocalDateString = (date = new Date()) => {
@@ -254,6 +265,11 @@ async function loadMonthData() {
   } finally {
     loadingMonth.value = false
   }
+}
+
+async function handleAppointmentSaved() {
+  showNewAppointment.value = false
+  await loadMonthData()
 }
 
 onMounted(async () => {

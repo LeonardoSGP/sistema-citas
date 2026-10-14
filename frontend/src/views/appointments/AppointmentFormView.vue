@@ -101,8 +101,8 @@
         </div>
 
         <div class="flex flex-col-reverse justify-end gap-3 border-t border-rose-100 pt-5 sm:flex-row">
-          <button type="button" @click="router.back()" class="btn-secondary sm:min-w-32">Cancelar</button>
-          <button type="submit" class="btn-primary sm:min-w-40" :disabled="loading">
+          <button type="button" @click="cancelForm" class="btn-secondary btn-sm sm:min-w-28">Cancelar</button>
+          <button type="submit" class="btn-primary btn-sm sm:min-w-32" :disabled="loading">
             {{ loading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Crear Cita') }}
           </button>
         </div>
@@ -122,6 +122,8 @@ import { useNotification } from '../../composables/useNotification'
 const router = useRouter()
 const route = useRoute()
 const { success, error } = useNotification()
+const props = defineProps<{ modal?: boolean; initialPatientId?: number; initialDate?: string }>()
+const emit = defineEmits<{ close: []; saved: [] }>()
 
 const isEdit = computed(() => !!route.params.id)
 const loading = ref(false)
@@ -225,7 +227,8 @@ async function handleSubmit() {
       await appointmentsService.create(form)
       success('Cita creada correctamente')
     }
-    await router.replace({ path: '/appointments', query: { refreshed: String(Date.now()) } })
+    if (props.modal) emit('saved')
+    else await router.replace({ path: '/appointments', query: { refreshed: String(Date.now()) } })
   } catch (err: unknown) {
     const e = err as { response?: { data?: { message?: string } } }
     serverError.value = e.response?.data?.message || 'Error al guardar la cita'
@@ -235,17 +238,23 @@ async function handleSubmit() {
   }
 }
 
+function cancelForm() {
+  if (props.modal) emit('close')
+  else router.back()
+}
+
 onMounted(async () => {
   try {
     const pResponse = await patientsService.getAll()
     patients.value = pResponse.data
 
     // Pre-select patient if passed via query
-    if (route.query.patientId) {
-      form.patientId = Number(route.query.patientId)
+    if (props.initialPatientId || route.query.patientId) {
+      form.patientId = props.initialPatientId || Number(route.query.patientId)
       const patient = patients.value.find((item) => item.id === form.patientId)
       if (patient) patientSearch.value = patient.nombre
     }
+    if (props.initialDate || route.query.date) form.fecha = props.initialDate || String(route.query.date)
 
     if (isEdit.value) {
       const aResponse = await appointmentsService.getById(Number(route.params.id))

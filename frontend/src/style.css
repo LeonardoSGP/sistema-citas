@@ -30,7 +30,7 @@
     @apply bg-red-500 hover:bg-red-600 text-white font-medium py-2.5 px-5 rounded-2xl transition-all duration-200 shadow-sm hover:shadow-md;
   }
   .btn-sm {
-    @apply py-1.5 px-4 text-sm rounded-xl;
+    @apply py-1.5 px-3 text-sm rounded-xl;
   }
   .input-field {
     @apply w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:border-primary-400 focus:outline-none focus:ring-4 focus:ring-primary-50 transition-all bg-slate-50/50 hover:bg-white;

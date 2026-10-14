@@ -38,13 +38,13 @@
           </p>
         </div>
       </div>
-      <RouterLink to="/session-notes/new" class="btn-primary whitespace-nowrap">+ Nueva Nota</RouterLink>
+      <button type="button" class="btn-primary whitespace-nowrap" @click="showNewNote = true">+ Nueva Nota</button>
     </div>
 
     <div class="card overflow-hidden border-rose-100 bg-fuchsia-50/80 p-0 shadow-[0_10px_35px_-12px_rgba(225,29,72,0.25)]">
       <LoadingSpinner v-if="loading" />
       <EmptyState v-else-if="!notes.length" title="Sin notas" description="No hay notas de sesión registradas">
-        <RouterLink to="/session-notes/new" class="btn-primary">Crear primera nota</RouterLink>
+        <button type="button" class="btn-primary" @click="showNewNote = true">Crear primera nota</button>
       </EmptyState>
       <div v-else>
         <div class="divide-y divide-rose-100">
@@ -77,6 +77,9 @@
       </div>
     </div>
   </div>
+  <FormModal v-model="showNewNote">
+    <SessionNoteFormView modal @close="showNewNote = false" @saved="handleNoteSaved" />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
@@ -89,9 +92,12 @@ import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import { useFormatters } from '../../composables/useFormatters'
 import { useNotification } from '../../composables/useNotification'
+import FormModal from '../../components/FormModal.vue'
+import SessionNoteFormView from './SessionNoteFormView.vue'
 
 const { formatDate } = useFormatters()
 const { error } = useNotification()
+const showNewNote = ref(false)
 const notes = ref<SessionNote[]>([])
 const patients = ref<Patient[]>([])
 const loading = ref(true)
@@ -153,4 +159,10 @@ onMounted(async () => {
   } catch { /* ignore */ }
   await loadNotes()
 })
+
+async function handleNoteSaved() {
+  showNewNote.value = false
+  currentPage.value = 1
+  await loadNotes()
+}
 </script>
