@@ -112,8 +112,8 @@
                       @click="markAttendance(appt, 'No asistió')"
                     >No asistió</button>
                   </template>
-                  <RouterLink :to="`/appointments/${appt.id}`" class="text-sm text-primary-600 hover:text-primary-700">Ver</RouterLink>
-                  <RouterLink :to="`/appointments/${appt.id}/edit`" class="text-sm text-rose-700 hover:text-primary-900">Editar</RouterLink>
+                  <button type="button" class="text-sm text-primary-600 hover:text-primary-700" @click="openAppointmentDetail(appt.id)">Ver</button>
+                  <button type="button" class="text-sm text-rose-700 hover:text-primary-900" @click="openEditAppointment(appt.id)">Editar</button>
                   <button
                     v-if="appt.estado === 'Programada'"
                     @click="openReschedule(appt)"
@@ -150,8 +150,8 @@
                   @click="markAttendance(appt, 'No asistió')"
                 >No asistió</button>
               </template>
-              <RouterLink :to="`/appointments/${appt.id}`" class="btn-secondary btn-sm text-xs">Ver</RouterLink>
-              <RouterLink :to="`/appointments/${appt.id}/edit`" class="btn-secondary btn-sm text-xs">Editar</RouterLink>
+              <button type="button" class="btn-secondary btn-sm text-xs" @click="openAppointmentDetail(appt.id)">Ver</button>
+              <button type="button" class="btn-secondary btn-sm text-xs" @click="openEditAppointment(appt.id)">Editar</button>
               <button
                 v-if="appt.estado === 'Programada'"
                 @click="openReschedule(appt)"
@@ -176,7 +176,7 @@
 
     <!-- Reschedule Modal -->
     <Teleport to="body">
-      <div v-if="showRescheduleModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div v-if="showRescheduleModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/35 p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
           <h3 class="text-lg font-semibold text-slate-900 mb-4">Re-programar Cita</h3>
           <p class="text-sm text-slate-600 mb-4">Paciente: <strong>{{ rescheduleAppt?.patient?.nombre }}</strong></p>
@@ -216,6 +216,12 @@
         @saved="handleAppointmentSaved"
       />
     </FormModal>
+    <FormModal v-model="showEditAppointment">
+      <AppointmentFormView modal :appointment-id="selectedAppointmentId" @close="showEditAppointment = false" @saved="handleAppointmentSaved" />
+    </FormModal>
+    <FormModal v-model="showAppointmentDetail">
+      <AppointmentDetailView modal :appointment-id="selectedAppointmentId" />
+    </FormModal>
   </div>
 </template>
 
@@ -232,11 +238,15 @@ import { useFormatters } from '../../composables/useFormatters'
 import { useNotification } from '../../composables/useNotification'
 import FormModal from '../../components/FormModal.vue'
 import AppointmentFormView from './AppointmentFormView.vue'
+import AppointmentDetailView from './AppointmentDetailView.vue'
 
 const { formatShortDate, formatTime } = useFormatters()
 const { success, error } = useNotification()
 const showNewAppointment = ref(false)
 const newAppointmentPatientId = ref<number | undefined>()
+const showEditAppointment = ref(false)
+const showAppointmentDetail = ref(false)
+const selectedAppointmentId = ref(0)
 const allAppointments = ref<Appointment[]>([])
 const loading = ref(true)
 const activeTab = ref('all')
@@ -396,6 +406,16 @@ function clearPatientFilter() {
 function openNewAppointment(patientId?: number) {
   newAppointmentPatientId.value = patientId
   showNewAppointment.value = true
+}
+
+function openEditAppointment(id: number) {
+  selectedAppointmentId.value = id
+  showEditAppointment.value = true
+}
+
+function openAppointmentDetail(id: number) {
+  selectedAppointmentId.value = id
+  showAppointmentDetail.value = true
 }
 
 async function handleAppointmentSaved() {

@@ -122,10 +122,11 @@ import { useNotification } from '../../composables/useNotification'
 const router = useRouter()
 const route = useRoute()
 const { success, error } = useNotification()
-const props = defineProps<{ modal?: boolean; initialPatientId?: number; initialDate?: string }>()
+const props = defineProps<{ modal?: boolean; appointmentId?: number; initialPatientId?: number; initialDate?: string }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
 
-const isEdit = computed(() => !!route.params.id)
+const editId = computed(() => props.appointmentId || (route.params.id ? Number(route.params.id) : 0))
+const isEdit = computed(() => editId.value > 0)
 const loading = ref(false)
 const serverError = ref('')
 const patients = ref<Patient[]>([])
@@ -221,7 +222,7 @@ async function handleSubmit() {
   serverError.value = ''
   try {
     if (isEdit.value) {
-      await appointmentsService.update(Number(route.params.id), form)
+      await appointmentsService.update(editId.value, form)
       success('Cita actualizada correctamente')
     } else {
       await appointmentsService.create(form)
@@ -257,7 +258,7 @@ onMounted(async () => {
     if (props.initialDate || route.query.date) form.fecha = props.initialDate || String(route.query.date)
 
     if (isEdit.value) {
-      const aResponse = await appointmentsService.getById(Number(route.params.id))
+      const aResponse = await appointmentsService.getById(editId.value)
       const appt = aResponse.data
       form.patientId = appt.patientId
       const patient = patients.value.find((item) => item.id === form.patientId)

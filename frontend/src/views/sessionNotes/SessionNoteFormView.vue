@@ -94,10 +94,11 @@ const router = useRouter()
 const route = useRoute()
 const { success, error } = useNotification()
 const { formatShortDate, formatTime } = useFormatters()
-const props = defineProps<{ modal?: boolean; initialPatientId?: number; initialAppointmentId?: number }>()
+const props = defineProps<{ modal?: boolean; noteId?: number; initialPatientId?: number; initialAppointmentId?: number }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
 
-const isEdit = computed(() => !!route.params.id)
+const editId = computed(() => props.noteId || (route.params.id ? Number(route.params.id) : 0))
+const isEdit = computed(() => editId.value > 0)
 const loading = ref(false)
 const serverError = ref('')
 const patients = ref<Patient[]>([])
@@ -138,7 +139,7 @@ async function handleSubmit() {
   serverError.value = ''
   try {
     if (isEdit.value) {
-      await sessionNotesService.update(Number(route.params.id), form)
+      await sessionNotesService.update(editId.value, form)
       success('Nota actualizada correctamente')
     } else {
       await sessionNotesService.create(form)
@@ -173,7 +174,7 @@ onMounted(async () => {
     }
 
     if (isEdit.value) {
-      const nRes = await sessionNotesService.getById(Number(route.params.id))
+      const nRes = await sessionNotesService.getById(editId.value)
       const note = nRes.data
       form.patientId = note.patientId
       form.appointmentId = note.appointmentId || null
@@ -184,6 +185,9 @@ onMounted(async () => {
       form.seguimiento = note.seguimiento || ''
       await loadPatientAppointments()
     }
-  } catch { error('Error al cargar datos') }
+  } catch (err: unknown) {
+    const e = err as { response?: { data?: { message?: string } }; message?: string }
+    error(e.response?.data?.message || e.message || 'No se pudieron cargar los datos de la nota')
+  }
 })
 </script>

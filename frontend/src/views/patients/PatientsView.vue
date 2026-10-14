@@ -67,7 +67,7 @@
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
                   <RouterLink :to="`/patients/${patient.id}/expediente`" class="text-primary-600 hover:text-primary-700 text-sm font-medium">Expediente</RouterLink>
-                  <RouterLink :to="`/patients/${patient.id}/edit`" class="text-rose-700 hover:text-primary-900 text-sm">Editar</RouterLink>
+                  <button type="button" class="text-rose-700 hover:text-primary-900 text-sm" @click="openEditPatient(patient.id)">Editar</button>
                 </div>
               </td>
             </tr>
@@ -87,7 +87,7 @@
             </div>
             <div class="flex gap-3 mt-3">
               <RouterLink :to="`/patients/${patient.id}/expediente`" class="btn-secondary btn-sm text-xs">Expediente</RouterLink>
-              <RouterLink :to="`/patients/${patient.id}/edit`" class="btn-secondary btn-sm text-xs">Editar</RouterLink>
+              <button type="button" class="btn-secondary btn-sm text-xs" @click="openEditPatient(patient.id)">Editar</button>
               <span v-if="patient._count?.appointments" class="rounded-full bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700">Continuidad</span>
               <span v-else class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">Nuevo</span>
             </div>
@@ -125,6 +125,9 @@
   <FormModal v-model="showNewPatient">
     <PatientFormView modal @close="showNewPatient = false" @saved="handlePatientSaved" />
   </FormModal>
+  <FormModal v-model="showEditPatient">
+    <PatientFormView :patient-id="selectedPatientId" modal @close="showEditPatient = false" @saved="handlePatientSaved" />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
@@ -140,6 +143,8 @@ import PatientFormView from './PatientFormView.vue'
 
 const { error } = useNotification()
 const showNewPatient = ref(false)
+const showEditPatient = ref(false)
+const selectedPatientId = ref(0)
 const patients = ref<Patient[]>([])
 const loading = ref(true)
 const search = ref('')
@@ -223,6 +228,11 @@ async function handlePatientSaved() {
   showNewPatient.value = false
   currentPage.value = 1
   await loadPatients()
+}
+
+function openEditPatient(id: number) {
+  selectedPatientId.value = id
+  showEditPatient.value = true
 }
 
 onMounted(loadPatients)

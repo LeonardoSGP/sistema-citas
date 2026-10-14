@@ -59,7 +59,7 @@
               <p v-if="note.motivo" class="mt-1 text-sm text-rose-800">{{ note.motivo }}</p>
               <p v-if="note.notas" class="mt-0.5 line-clamp-2 text-sm text-primary-700">{{ note.notas }}</p>
             </div>
-            <RouterLink :to="`/session-notes/${note.id}/edit`" class="btn-secondary btn-sm ml-4 flex-shrink-0 border-rose-200 bg-rose-50 text-primary-700 text-xs">Editar</RouterLink>
+            <button type="button" class="btn-secondary btn-sm ml-4 flex-shrink-0 border-rose-200 bg-rose-50 text-primary-700 text-xs" @click="openEditNote(note.id)">Editar</button>
           </div>
         </div>
       </div>
@@ -80,6 +80,9 @@
   <FormModal v-model="showNewNote">
     <SessionNoteFormView modal @close="showNewNote = false" @saved="handleNoteSaved" />
   </FormModal>
+  <FormModal v-model="showEditNote">
+    <SessionNoteFormView modal :note-id="selectedNoteId" @close="showEditNote = false" @saved="handleNoteSaved" />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
@@ -98,6 +101,8 @@ import SessionNoteFormView from './SessionNoteFormView.vue'
 const { formatDate } = useFormatters()
 const { error } = useNotification()
 const showNewNote = ref(false)
+const showEditNote = ref(false)
+const selectedNoteId = ref(0)
 const notes = ref<SessionNote[]>([])
 const patients = ref<Patient[]>([])
 const loading = ref(true)
@@ -164,5 +169,10 @@ async function handleNoteSaved() {
   showNewNote.value = false
   currentPage.value = 1
   await loadNotes()
+}
+
+function openEditNote(id: number) {
+  selectedNoteId.value = id
+  showEditNote.value = true
 }
 </script>

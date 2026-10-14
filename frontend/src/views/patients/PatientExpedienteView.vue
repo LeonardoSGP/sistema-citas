@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <div class="flex items-center gap-3">
-      <button @click="router.back()" class="p-2 rounded-lg hover:bg-slate-200">
+      <button v-if="!modal" @click="router.back()" class="p-2 rounded-lg hover:bg-slate-200">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
@@ -26,7 +26,7 @@
               <span :class="patient.activo ? 'text-green-600' : 'text-red-500'">{{ patient.activo ? 'Activo' : 'Inactivo' }}</span>
             </div>
           </div>
-          <RouterLink :to="`/patients/${patient.id}/edit`" class="btn-secondary btn-sm">Editar</RouterLink>
+          <button type="button" class="btn-secondary btn-sm" @click="showEditPatient = true">Editar</button>
         </div>
       </div>
 
@@ -42,7 +42,7 @@
             v-for="appt in patient.appointments"
             :key="appt.id"
             class="flex items-center gap-4 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer"
-            @click="router.push(`/appointments/${appt.id}`)"
+            @click="openAppointment(appt.id)"
           >
             <div class="w-24">
               <p class="text-sm font-semibold text-slate-700">{{ formatShortDate(appt.fecha) }}</p>
@@ -71,7 +71,7 @@
           >
             <div class="flex items-center justify-between mb-2">
               <p class="text-sm font-semibold text-slate-700">{{ formatDate(note.fecha) }}</p>
-              <RouterLink :to="`/session-notes/${note.id}/edit`" class="text-xs text-primary-600 hover:text-primary-700">Editar</RouterLink>
+              <button type="button" class="text-xs text-primary-600 hover:text-primary-700" @click.stop="openNote(note.id)">Editar</button>
             </div>
             <p class="text-sm text-slate-600">{{ note.motivo || 'Sin motivo registrado' }}</p>
             <p v-if="note.notas" class="text-sm text-slate-500 mt-1 line-clamp-2">{{ note.notas }}</p>
@@ -86,11 +86,23 @@
   <FormModal v-model="showNewNote">
     <SessionNoteFormView modal :initial-patient-id="patient?.id" @close="showNewNote = false" @saved="handleNoteSaved" />
   </FormModal>
+  <FormModal v-model="showEditAppointment">
+    <AppointmentFormView modal :appointment-id="selectedAppointmentId" @close="showEditAppointment = false" @saved="refreshPatient" />
+  </FormModal>
+  <FormModal v-model="showEditNote">
+    <SessionNoteFormView modal :note-id="selectedNoteId" @close="showEditNote = false" @saved="refreshPatient" />
+  </FormModal>
+  <FormModal v-model="showEditPatient">
+    <PatientFormView modal :patient-id="patient?.id" @close="showEditPatient = false" @saved="refreshPatient" />
+  </FormModal>
+  <FormModal v-model="showAppointmentDetail">
+    <AppointmentDetailView modal :appointment-id="selectedAppointmentId" />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute, RouterLink } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { patientsService } from '../../services/patients.service'
 import type { Patient } from '../../types'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
@@ -100,18 +112,28 @@ import { useFormatters } from '../../composables/useFormatters'
 import FormModal from '../../components/FormModal.vue'
 import AppointmentFormView from '../appointments/AppointmentFormView.vue'
 import SessionNoteFormView from '../sessionNotes/SessionNoteFormView.vue'
+import AppointmentDetailView from '../appointments/AppointmentDetailView.vue'
+import PatientFormView from './PatientFormView.vue'
 
 const router = useRouter()
 const route = useRoute()
 const { formatDate, formatShortDate, formatTime } = useFormatters()
+const props = defineProps<{ modal?: boolean; patientId?: number }>()
 const patient = ref<Patient | null>(null)
 const loading = ref(true)
 const showNewAppointment = ref(false)
 const showNewNote = ref(false)
+const showEditAppointment = ref(false)
+const showEditNote = ref(false)
+const showEditPatient = ref(false)
+const showAppointmentDetail = ref(false)
+const selectedAppointmentId = ref(0)
+const selectedNoteId = ref(0)
+const recordId = () => props.patientId || Number(route.params.id)
 
 onMounted(async () => {
   try {
-    const response = await patientsService.getExpediente(Number(route.params.id))
+    const response = await patientsService.getExpediente(recordId())
     patient.value = response.data
   } catch {
     router.push('/patients')
@@ -131,6 +153,24 @@ async function handleNoteSaved() {
   showNewNote.value = false
   if (!patient.value) return
   const response = await patientsService.getExpediente(patient.value.id)
+  patient.value = response.data
+}
+
+function openAppointment(id: number) {
+  selectedAppointmentId.value = id
+  showAppointmentDetail.value = true
+}
+
+function openNote(id: number) {
+  selectedNoteId.value = id
+  showEditNote.value = true
+}
+
+async function refreshPatient() {
+  showEditAppointment.value = false
+  showEditNote.value = false
+  showEditPatient.value = false
+  const response = await patientsService.getExpediente(recordId())
   patient.value = response.data
 }
 </script>

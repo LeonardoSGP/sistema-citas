@@ -82,10 +82,11 @@ import { useNotification } from '../../composables/useNotification'
 const router = useRouter()
 const route = useRoute()
 const { success, error } = useNotification()
-const props = defineProps<{ modal?: boolean }>()
+const props = defineProps<{ modal?: boolean; patientId?: number }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
 
-const isEdit = computed(() => !!route.params.id)
+const editId = computed(() => props.patientId || (route.params.id ? Number(route.params.id) : 0))
+const isEdit = computed(() => editId.value > 0)
 const loading = ref(false)
 const serverError = ref('')
 
@@ -133,7 +134,7 @@ async function handleSubmit() {
   serverError.value = ''
   try {
     if (isEdit.value) {
-      await patientsService.update(Number(route.params.id), form)
+      await patientsService.update(editId.value, form)
       success('Paciente actualizado correctamente')
     } else {
       await patientsService.create(form)
@@ -158,7 +159,7 @@ function cancelForm() {
 onMounted(async () => {
   if (isEdit.value) {
     try {
-      const response = await patientsService.getById(Number(route.params.id))
+      const response = await patientsService.getById(editId.value)
       Object.assign(form, {
         expediente: response.data.expediente || '',
         nombre: response.data.nombre,
