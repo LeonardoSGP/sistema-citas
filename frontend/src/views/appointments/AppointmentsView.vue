@@ -219,7 +219,7 @@
     <FormModal v-model="showEditAppointment">
       <AppointmentFormView modal :appointment-id="selectedAppointmentId" @close="showEditAppointment = false" @saved="handleAppointmentSaved" />
     </FormModal>
-    <FormModal v-model="showAppointmentDetail">
+    <FormModal v-model="showAppointmentDetail" size="wide">
       <AppointmentDetailView modal :appointment-id="selectedAppointmentId" />
     </FormModal>
   </div>

@@ -1,6 +1,6 @@
 <template>
-  <div class="space-y-6 max-w-6xl">
-    <div class="flex items-center gap-3">
+  <div class="max-w-6xl" :class="modal ? 'space-y-4 rounded-[2rem] bg-slate-50/95 p-3 sm:p-5' : 'space-y-6'">
+    <div v-if="!modal" class="flex items-center gap-3">
       <button v-if="!modal" @click="router.back()" class="p-2 rounded-lg hover:bg-slate-200">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -12,7 +12,7 @@
     <LoadingSpinner v-if="loading" />
 
     <template v-else-if="appointment">
-      <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
+      <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
       <div class="space-y-6">
       <div class="card">
         <div class="flex items-start justify-between mb-4">
@@ -163,7 +163,7 @@
       @saved="handleAppointmentSaved"
     />
   </FormModal>
-  <FormModal v-model="showPatientRecord">
+  <FormModal v-model="showPatientRecord" size="wide">
     <PatientExpedienteView modal :patient-id="appointment?.patientId" />
   </FormModal>
   <FormModal v-model="showNewNote">

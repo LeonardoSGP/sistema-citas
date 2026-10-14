@@ -95,7 +95,7 @@
   <FormModal v-model="showEditPatient">
     <PatientFormView modal :patient-id="patient?.id" @close="showEditPatient = false" @saved="refreshPatient" />
   </FormModal>
-  <FormModal v-model="showAppointmentDetail">
+  <FormModal v-model="showAppointmentDetail" size="wide">
     <AppointmentDetailView modal :appointment-id="selectedAppointmentId" />
   </FormModal>
 </template>
