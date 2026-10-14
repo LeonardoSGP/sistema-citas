@@ -1,7 +1,7 @@
 <template>
-  <div class="max-w-4xl rounded-[2rem] bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 p-4 sm:p-6">
-    <div class="mb-6 flex items-center gap-3 rounded-[1.5rem] border border-rose-100 bg-rose-100/70 p-4 shadow-sm">
-      <button @click="router.back()" class="rounded-xl p-2 text-rose-700 transition hover:bg-rose-200/70 hover:text-primary-800">
+  <div class="max-w-4xl rounded-[2rem] bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50" :class="modal ? 'p-2 sm:p-3' : 'p-4 sm:p-6'">
+    <div class="flex items-center gap-3 rounded-[1.5rem] border border-rose-100 bg-rose-100/70 p-4 shadow-sm" :class="modal ? 'mb-3' : 'mb-6'">
+      <button v-if="!modal" @click="router.back()" class="rounded-xl p-2 text-rose-700 transition hover:bg-rose-200/70 hover:text-primary-800">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
@@ -12,8 +12,8 @@
       </div>
     </div>
 
-    <div class="card border-rose-100 bg-fuchsia-50/80 shadow-[0_10px_35px_-12px_rgba(225,29,72,0.2)]">
-      <form @submit.prevent="handleSubmit" class="space-y-6">
+    <div class="card border-rose-100 bg-fuchsia-50/80 shadow-[0_10px_35px_-12px_rgba(225,29,72,0.2)]" :class="modal ? 'p-4 sm:p-5' : ''">
+      <form @submit.prevent="handleSubmit" :class="modal ? 'space-y-4' : 'space-y-6'">
         <div>
           <label class="label text-rose-900">Paciente</label>
           <div class="relative">
