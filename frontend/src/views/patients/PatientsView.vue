@@ -66,7 +66,7 @@
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
-                  <RouterLink :to="`/patients/${patient.id}/expediente`" class="text-primary-600 hover:text-primary-700 text-sm font-medium">Expediente</RouterLink>
+                  <button type="button" class="text-primary-600 hover:text-primary-700 text-sm font-medium" @click="openPatientRecord(patient.id)">Expediente</button>
                   <button type="button" class="text-rose-700 hover:text-primary-900 text-sm" @click="openEditPatient(patient.id)">Editar</button>
                 </div>
               </td>
@@ -86,7 +86,7 @@
               </div>
             </div>
             <div class="flex gap-3 mt-3">
-              <RouterLink :to="`/patients/${patient.id}/expediente`" class="btn-secondary btn-sm text-xs">Expediente</RouterLink>
+              <button type="button" class="btn-secondary btn-sm text-xs" @click="openPatientRecord(patient.id)">Expediente</button>
               <button type="button" class="btn-secondary btn-sm text-xs" @click="openEditPatient(patient.id)">Editar</button>
               <span v-if="patient._count?.appointments" class="rounded-full bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700">Continuidad</span>
               <span v-else class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">Nuevo</span>
@@ -128,11 +128,13 @@
   <FormModal v-model="showEditPatient">
     <PatientFormView :patient-id="selectedPatientId" modal @close="showEditPatient = false" @saved="handlePatientSaved" />
   </FormModal>
+  <FormModal v-model="showPatientRecord" size="wide">
+    <PatientExpedienteView modal :patient-id="selectedPatientId" />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
 import { patientsService } from '../../services/patients.service'
 import type { Patient } from '../../types'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
@@ -140,10 +142,12 @@ import EmptyState from '../../components/EmptyState.vue'
 import { useNotification } from '../../composables/useNotification'
 import FormModal from '../../components/FormModal.vue'
 import PatientFormView from './PatientFormView.vue'
+import PatientExpedienteView from './PatientExpedienteView.vue'
 
 const { error } = useNotification()
 const showNewPatient = ref(false)
 const showEditPatient = ref(false)
+const showPatientRecord = ref(false)
 const selectedPatientId = ref(0)
 const patients = ref<Patient[]>([])
 const loading = ref(true)
@@ -233,6 +237,11 @@ async function handlePatientSaved() {
 function openEditPatient(id: number) {
   selectedPatientId.value = id
   showEditPatient.value = true
+}
+
+function openPatientRecord(id: number) {
+  selectedPatientId.value = id
+  showPatientRecord.value = true
 }
 
 onMounted(loadPatients)

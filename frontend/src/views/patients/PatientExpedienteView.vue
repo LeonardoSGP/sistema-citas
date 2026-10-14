@@ -22,8 +22,6 @@
               <span>{{ patient.edad }} años</span>
               <span>·</span>
               <span>{{ patient.sexo }}</span>
-              <span>·</span>
-              <span :class="patient.activo ? 'text-green-600' : 'text-red-500'">{{ patient.activo ? 'Activo' : 'Inactivo' }}</span>
             </div>
           </div>
           <button type="button" class="btn-secondary btn-sm" @click="showEditPatient = true">Editar</button>
