@@ -104,21 +104,25 @@
                       class="text-sm font-medium text-emerald-600 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                       :disabled="statusLoading[appt.id]"
                       @click="markAttendance(appt, 'Atendida')"
-                    >{{ statusLoading[appt.id] ? 'Guardando...' : 'Asistió' }}</button>
+                    ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6"/></svg></button>
                     <button
                       type="button"
                       class="text-sm font-medium text-slate-500 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                       :disabled="statusLoading[appt.id]"
                       @click="markAttendance(appt, 'No asistió')"
-                    >No asistió</button>
+                    ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="m7 7 10 10M17 7 7 17"/></svg></button>
                   </template>
-                  <button type="button" class="text-sm text-primary-600 hover:text-primary-700" @click="openAppointmentDetail(appt.id)">Ver</button>
-                  <button type="button" class="text-sm text-rose-700 hover:text-primary-900" @click="openEditAppointment(appt.id)">Editar</button>
+                  <button type="button" class="icon-action text-primary-600 hover:bg-primary-50 hover:text-primary-700" title="Ver detalle" aria-label="Ver detalle" @click="openAppointmentDetail(appt.id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                  </button>
+                  <button type="button" class="icon-action text-rose-700 hover:bg-rose-50 hover:text-primary-900" title="Editar cita" aria-label="Editar cita" @click="openEditAppointment(appt.id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m14.5 5.5 4 4M4 20l4.2-1 10.9-10.9a2.8 2.8 0 0 0-4-4L4.2 15 4 20Z"/></svg>
+                  </button>
                   <button
                     v-if="appt.estado === 'Programada'"
                     @click="openReschedule(appt)"
                     class="text-sm text-amber-600 hover:text-amber-700"
-                  >Re-programar</button>
+                  ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z"/><path stroke-linecap="round" d="M12 12v3l2 1"/></svg></button>
                 </div>
               </td>
             </tr>
@@ -142,21 +146,25 @@
                   class="btn-sm text-xs font-medium text-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
                   :disabled="statusLoading[appt.id]"
                   @click="markAttendance(appt, 'Atendida')"
-                >{{ statusLoading[appt.id] ? 'Guardando...' : 'Asistió' }}</button>
+                ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6"/></svg></button>
                 <button
                   type="button"
                   class="btn-sm text-xs font-medium text-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
                   :disabled="statusLoading[appt.id]"
                   @click="markAttendance(appt, 'No asistió')"
-                >No asistió</button>
+                ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="m7 7 10 10M17 7 7 17"/></svg></button>
               </template>
-              <button type="button" class="btn-secondary btn-sm text-xs" @click="openAppointmentDetail(appt.id)">Ver</button>
-              <button type="button" class="btn-secondary btn-sm text-xs" @click="openEditAppointment(appt.id)">Editar</button>
+              <button type="button" class="icon-action text-primary-600 hover:bg-primary-50 hover:text-primary-700" title="Ver detalle" aria-label="Ver detalle" @click="openAppointmentDetail(appt.id)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+              </button>
+              <button type="button" class="icon-action text-rose-700 hover:bg-rose-50 hover:text-primary-900" title="Editar cita" aria-label="Editar cita" @click="openEditAppointment(appt.id)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m14.5 5.5 4 4M4 20l4.2-1 10.9-10.9a2.8 2.8 0 0 0-4-4L4.2 15 4 20Z"/></svg>
+              </button>
               <button
                 v-if="appt.estado === 'Programada'"
                 @click="openReschedule(appt)"
                 class="btn-sm text-xs text-amber-600"
-              >Re-programar</button>
+              ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z"/><path stroke-linecap="round" d="M12 12v3l2 1"/></svg></button>
             </div>
           </div>
         </div>

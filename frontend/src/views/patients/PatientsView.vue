@@ -66,8 +66,12 @@
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
-                  <button type="button" class="text-primary-600 hover:text-primary-700 text-sm font-medium" @click="openPatientRecord(patient.id)">Expediente</button>
-                  <button type="button" class="text-rose-700 hover:text-primary-900 text-sm" @click="openEditPatient(patient.id)">Editar</button>
+                  <button type="button" class="icon-action text-primary-600 hover:bg-primary-50 hover:text-primary-700" title="Ver expediente" aria-label="Ver expediente" @click="openPatientRecord(patient.id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/><path stroke-linecap="round" d="M4 5.5v16M8 7h8M8 11h8"/></svg>
+                  </button>
+                  <button type="button" class="icon-action text-rose-700 hover:bg-rose-50 hover:text-primary-900" title="Editar paciente" aria-label="Editar paciente" @click="openEditPatient(patient.id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m14.5 5.5 4 4M4 20l4.2-1 10.9-10.9a2.8 2.8 0 0 0-4-4L4.2 15 4 20Z"/></svg>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -86,8 +90,12 @@
               </div>
             </div>
             <div class="flex gap-3 mt-3">
-              <button type="button" class="btn-secondary btn-sm text-xs" @click="openPatientRecord(patient.id)">Expediente</button>
-              <button type="button" class="btn-secondary btn-sm text-xs" @click="openEditPatient(patient.id)">Editar</button>
+              <button type="button" class="icon-action text-primary-600 hover:bg-primary-50 hover:text-primary-700" title="Ver expediente" aria-label="Ver expediente" @click="openPatientRecord(patient.id)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/><path stroke-linecap="round" d="M4 5.5v16M8 7h8M8 11h8"/></svg>
+              </button>
+              <button type="button" class="icon-action text-rose-700 hover:bg-rose-50 hover:text-primary-900" title="Editar paciente" aria-label="Editar paciente" @click="openEditPatient(patient.id)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m14.5 5.5 4 4M4 20l4.2-1 10.9-10.9a2.8 2.8 0 0 0-4-4L4.2 15 4 20Z"/></svg>
+              </button>
               <span v-if="patient._count?.appointments" class="rounded-full bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700">Continuidad</span>
               <span v-else class="rounded-full bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700">Nuevo</span>
             </div>
