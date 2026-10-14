@@ -1,7 +1,7 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center gap-3">
-      <button v-if="!modal" @click="router.back()" class="p-2 rounded-lg hover:bg-slate-200">
+  <div :class="modal ? 'space-y-4 rounded-[2rem] bg-slate-50/95 p-3 sm:p-5' : 'space-y-6'">
+    <div v-if="!modal" class="flex items-center gap-3">
+      <button @click="router.back()" class="p-2 rounded-lg hover:bg-slate-200">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
@@ -13,7 +13,7 @@
 
     <template v-else-if="patient">
       <!-- Patient info card -->
-      <div class="card">
+      <div class="card" :class="modal ? 'p-4 sm:p-5' : ''">
         <div class="flex items-start justify-between">
           <div>
             <p class="text-2xl font-bold text-slate-900">{{ patient.nombre }}</p>
@@ -31,7 +31,7 @@
       </div>
 
       <!-- Appointments -->
-      <div class="card">
+      <div class="card" :class="modal ? 'p-4 sm:p-5' : ''">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-slate-900">Historial de Citas</h3>
           <button type="button" class="btn-primary btn-sm text-sm" @click="showNewAppointment = true">+ Nueva cita</button>
@@ -57,7 +57,7 @@
       </div>
 
       <!-- Session Notes -->
-      <div class="card">
+      <div class="card" :class="modal ? 'p-4 sm:p-5' : ''">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold text-slate-900">Notas de Sesión</h3>
           <button type="button" class="btn-primary btn-sm text-sm" @click="showNewNote = true">+ Nueva nota</button>
