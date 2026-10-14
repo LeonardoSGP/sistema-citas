@@ -22,7 +22,7 @@ export interface Patient {
 export interface Appointment {
   id: number
   patientId: number
-  patient?: Pick<Patient, 'id' | 'nombre' | 'expediente'>
+  patient?: Pick<Patient, 'id' | 'nombre' | 'expediente' | 'telefono' | 'edad' | 'sexo' | 'activo'>
   fecha: string
   horaInicio: string
   horaFin: string

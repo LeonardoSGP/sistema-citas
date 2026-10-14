@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6 max-w-2xl">
+  <div class="space-y-6 max-w-6xl">
     <div class="flex items-center gap-3">
       <button @click="router.back()" class="p-2 rounded-lg hover:bg-slate-200">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -12,6 +12,7 @@
     <LoadingSpinner v-if="loading" />
 
     <template v-else-if="appointment">
+      <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
       <div class="card">
         <div class="flex items-start justify-between mb-4">
           <div>
@@ -60,8 +61,51 @@
         </div>
       </div>
 
+      <aside class="card border-rose-100 bg-gradient-to-br from-rose-50 to-fuchsia-50 lg:sticky lg:top-6">
+        <div class="mb-5 flex items-start justify-between gap-3">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-primary-600">Paciente</p>
+            <h3 class="mt-1 text-xl font-semibold text-slate-900">{{ appointment.patient?.nombre }}</h3>
+          </div>
+          <StatusBadge :status="appointment.patient?.activo ? 'Activo' : 'Inactivo'" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div class="rounded-xl border border-rose-100 bg-white/70 p-3">
+            <p class="text-xs text-slate-500">Expediente</p>
+            <p class="mt-1 font-semibold text-primary-700">{{ appointment.patient?.expediente || 'Sin asignar' }}</p>
+          </div>
+          <div class="rounded-xl border border-rose-100 bg-white/70 p-3">
+            <p class="text-xs text-slate-500">Edad</p>
+            <p class="mt-1 font-semibold text-slate-800">{{ appointment.patient?.edad ?? 0 }} años</p>
+          </div>
+          <div class="rounded-xl border border-rose-100 bg-white/70 p-3">
+            <p class="text-xs text-slate-500">Sexo</p>
+            <p class="mt-1 font-semibold text-slate-800">{{ appointment.patient?.sexo || 'Sin registrar' }}</p>
+          </div>
+          <div class="rounded-xl border border-rose-100 bg-white/70 p-3">
+            <p class="text-xs text-slate-500">Teléfono</p>
+            <p class="mt-1 break-all font-semibold text-slate-800">{{ appointment.patient?.telefono || 'Sin registrar' }}</p>
+          </div>
+        </div>
+
+        <RouterLink
+          :to="`/patients/${appointment.patientId}/edit`"
+          class="btn-primary mt-5 flex w-full justify-center"
+        >
+          Editar paciente
+        </RouterLink>
+        <RouterLink
+          :to="`/patients/${appointment.patientId}/expediente`"
+          class="btn-secondary mt-2 flex w-full justify-center"
+        >
+          Ver expediente
+        </RouterLink>
+      </aside>
+      </div>
+
       <!-- Session notes -->
-      <div class="card">
+      <div class="card lg:max-w-[calc(100%-21rem)]">
         <h3 class="font-semibold text-slate-900 mb-4">Notas de sesión</h3>
         <EmptyState v-if="!appointment.sessionNotes?.length" title="Sin notas" description="No hay notas de sesión para esta cita" />
         <div v-else class="space-y-3">
