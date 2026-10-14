@@ -188,11 +188,17 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="label">Hora inicio</label>
-                <input v-model="rescheduleForm.horaInicio" type="time" min="08:00" max="14:00" class="input-field" @change="setRescheduleEndTime" />
+                <select v-model="rescheduleForm.horaInicio" class="input-field" @change="setRescheduleEndTime">
+                  <option value="">Seleccionar hora...</option>
+                  <option v-for="hour in appointmentHours" :key="hour" :value="hour">{{ hour }}</option>
+                </select>
               </div>
               <div>
                 <label class="label">Hora fin</label>
-                <input v-model="rescheduleForm.horaFin" type="time" min="08:00" max="14:00" class="input-field" />
+                <select v-model="rescheduleForm.horaFin" class="input-field">
+                  <option value="">Seleccionar hora...</option>
+                  <option v-for="hour in appointmentHours" :key="hour" :value="hour">{{ hour }}</option>
+                </select>
               </div>
             </div>
           </div>
@@ -280,6 +286,7 @@ const rescheduleAppt = ref<Appointment | null>(null)
 const rescheduleLoading = ref(false)
 const rescheduleError = ref('')
 const rescheduleForm = ref({ fecha: '', horaInicio: '', horaFin: '' })
+const appointmentHours = Array.from({ length: 7 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
 
 function openReschedule(appt: Appointment) {
   rescheduleAppt.value = appt
@@ -320,6 +327,10 @@ async function submitReschedule() {
   }
   if (rescheduleForm.value.horaFin > '14:00') {
     rescheduleError.value = 'Las citas deben terminar a más tardar a las 14:00'
+    return
+  }
+  if (!rescheduleForm.value.horaInicio.endsWith(':00') || !rescheduleForm.value.horaFin.endsWith(':00')) {
+    rescheduleError.value = 'Selecciona horas completas, por ejemplo 08:00 o 10:00'
     return
   }
   rescheduleLoading.value = true

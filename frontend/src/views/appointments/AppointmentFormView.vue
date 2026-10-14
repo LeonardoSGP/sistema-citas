@@ -64,12 +64,18 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="label text-rose-900">Hora inicio</label>
-            <input v-model="form.horaInicio" type="time" min="08:00" max="14:00" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaInicio}" @change="setEndTimeFromStart" />
+            <select v-model="form.horaInicio" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaInicio}" @change="setEndTimeFromStart">
+              <option value="">Seleccionar hora...</option>
+              <option v-for="hour in startHours" :key="hour" :value="hour">{{ hour }}</option>
+            </select>
             <p v-if="errors.horaInicio" class="text-red-500 text-xs mt-1">{{ errors.horaInicio }}</p>
           </div>
           <div>
             <label class="label text-rose-900">Hora fin</label>
-            <input v-model="form.horaFin" type="time" min="08:00" max="14:00" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaFin}" />
+            <select v-model="form.horaFin" class="input-field" :class="{'border-red-500 ring-4 ring-red-50': errors.horaFin}">
+              <option value="">Seleccionar hora...</option>
+              <option v-for="hour in endHours" :key="hour" :value="hour">{{ hour }}</option>
+            </select>
             <p v-if="errors.horaFin" class="text-red-500 text-xs mt-1">{{ errors.horaFin }}</p>
           </div>
         </div>
@@ -132,6 +138,8 @@ const serverError = ref('')
 const patients = ref<Patient[]>([])
 const patientSearch = ref('')
 const showPatientResults = ref(false)
+const startHours = Array.from({ length: 7 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
+const endHours = Array.from({ length: 7 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
 
 const filteredPatients = computed(() => {
   const query = patientSearch.value.trim().toLocaleLowerCase('es')
@@ -198,6 +206,14 @@ function validate() {
   }
   if (form.horaInicio && form.horaFin && form.horaFin <= form.horaInicio) {
     errors.horaFin = 'La hora de fin debe ser posterior a la hora de inicio'
+    valid = false
+  }
+  if (form.horaInicio && !form.horaInicio.endsWith(':00')) {
+    errors.horaInicio = 'Selecciona una hora completa'
+    valid = false
+  }
+  if (form.horaFin && !form.horaFin.endsWith(':00')) {
+    errors.horaFin = 'Selecciona una hora completa'
     valid = false
   }
   return valid

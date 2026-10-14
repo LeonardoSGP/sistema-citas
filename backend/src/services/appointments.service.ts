@@ -24,6 +24,9 @@ function addDays(date: Date, days: number): Date {
 }
 
 function validateBusinessHours(horaInicio: string, horaFin: string) {
+  if (!/^\d{2}:00$/.test(horaInicio) || !/^\d{2}:00$/.test(horaFin)) {
+    throw new Error('Las citas solo pueden usar horas completas, por ejemplo 08:00 o 10:00');
+  }
   if (horaInicio < OPENING_TIME) {
     throw new Error('Las citas deben iniciar a partir de las 08:00');
   }
