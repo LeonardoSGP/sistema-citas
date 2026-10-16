@@ -174,6 +174,29 @@
       @saved="handleNoteSaved"
     />
   </FormModal>
+  <FormModal v-model="showNextAppointmentPrompt">
+    <div class="rounded-[2rem] bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 p-5 sm:p-7">
+      <div class="rounded-[1.5rem] border border-rose-100 bg-white/80 p-5 text-center shadow-sm">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6"/></svg>
+        </div>
+        <h3 class="mt-4 text-lg font-semibold text-slate-900">Cita marcada como atendida</h3>
+        <p class="mt-2 text-sm text-slate-600">¿Quieres agendar la próxima cita para <strong>{{ appointment?.patient?.nombre }}</strong>?</p>
+        <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
+          <button type="button" class="btn-secondary btn-sm" @click="showNextAppointmentPrompt = false">Ahora no</button>
+          <button type="button" class="btn-primary btn-sm" @click="scheduleNextAppointment">Agendar próxima cita</button>
+        </div>
+      </div>
+    </div>
+  </FormModal>
+  <FormModal v-model="showNextAppointment">
+    <AppointmentFormView
+      modal
+      :initial-patient-id="appointment?.patientId"
+      @close="showNextAppointment = false"
+      @saved="showNextAppointment = false"
+    />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
@@ -213,6 +236,8 @@ const patientForm = ref({
 const showNewNote = ref(false)
 const showEditAppointment = ref(false)
 const showPatientRecord = ref(false)
+const showNextAppointmentPrompt = ref(false)
+const showNextAppointment = ref(false)
 const statuses: AppointmentStatus[] = ['Programada', 'Atendida', 'No asistió']
 const detailId = () => props.appointmentId || (route.params.id ? Number(route.params.id) : 0)
 
@@ -226,8 +251,14 @@ function startPatientEdit() {
     edad: patient.edad ?? 0,
     sexo: patient.sexo || 'Otro',
   }
+
   patientError.value = ''
   editingPatient.value = true
+}
+
+function scheduleNextAppointment() {
+  showNextAppointmentPrompt.value = false
+  showNextAppointment.value = true
 }
 
 async function savePatient() {
@@ -271,6 +302,7 @@ async function changeStatus(estado: AppointmentStatus) {
     await appointmentsService.changeStatus(Number(route.params.id), estado)
     if (appointment.value) appointment.value.estado = estado
     success('Estado actualizado')
+    if (estado === 'Atendida') showNextAppointmentPrompt.value = true
   } catch { error('Error al cambiar estado') }
 }
 
