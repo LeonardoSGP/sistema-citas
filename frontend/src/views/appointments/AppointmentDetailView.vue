@@ -189,6 +189,39 @@
       </div>
     </div>
   </FormModal>
+  <FormModal v-model="showReschedulePrompt">
+    <div class="rounded-[2rem] bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 p-5 sm:p-7">
+      <div class="rounded-[1.5rem] border border-rose-100 bg-white/80 p-5 text-center shadow-sm">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z"/><path stroke-linecap="round" d="M12 12v3l2 1"/></svg>
+        </div>
+        <h3 class="mt-4 text-lg font-semibold text-slate-900">Cita marcada como no asistida</h3>
+        <p class="mt-2 text-sm text-slate-600">¿Quieres reprogramar la cita de <strong>{{ appointment?.patient?.nombre }}</strong>?</p>
+        <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
+          <button type="button" class="btn-secondary btn-sm" @click="showReschedulePrompt = false">Ahora no</button>
+          <button type="button" class="btn-primary btn-sm" @click="showReschedulePrompt = false; showReschedule = true">Reprogramar cita</button>
+        </div>
+      </div>
+    </div>
+  </FormModal>
+  <FormModal v-model="showReschedule">
+    <div class="rounded-[2rem] bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 p-5 sm:p-7">
+      <div class="rounded-[1.5rem] border border-rose-100 bg-white/80 p-5 shadow-sm">
+        <h3 class="text-lg font-semibold text-slate-900">Reprogramar cita</h3>
+        <p class="mt-1 text-sm text-slate-600">{{ appointment?.patient?.nombre }}</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <input v-model="rescheduleForm.fecha" type="date" class="input-field" />
+          <select v-model="rescheduleForm.horaInicio" class="input-field" @change="setRescheduleEndTime"><option value="">Elegir hora</option><option v-for="hour in startHours" :key="hour" :value="hour">{{ hour }}</option></select>
+          <select v-model="rescheduleForm.horaFin" class="input-field"><option value="">Elegir hora</option><option v-for="hour in endHours" :key="hour" :value="hour">{{ hour }}</option></select>
+        </div>
+        <p v-if="rescheduleError" class="mt-3 rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700">{{ rescheduleError }}</p>
+        <div class="mt-4 flex justify-end gap-2">
+          <button type="button" class="btn-secondary btn-sm" @click="showReschedule = false">Cancelar</button>
+          <button type="button" class="btn-primary btn-sm" :disabled="rescheduleLoading" @click="submitReschedule">{{ rescheduleLoading ? 'Guardando...' : 'Guardar' }}</button>
+        </div>
+      </div>
+    </div>
+  </FormModal>
   <FormModal v-model="showNextAppointment">
     <AppointmentFormView
       modal
@@ -238,6 +271,13 @@ const showEditAppointment = ref(false)
 const showPatientRecord = ref(false)
 const showNextAppointmentPrompt = ref(false)
 const showNextAppointment = ref(false)
+const showReschedulePrompt = ref(false)
+const showReschedule = ref(false)
+const rescheduleLoading = ref(false)
+const rescheduleError = ref('')
+const rescheduleForm = ref({ fecha: '', horaInicio: '', horaFin: '' })
+const startHours = Array.from({ length: 6 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
+const endHours = Array.from({ length: 7 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
 const statuses: AppointmentStatus[] = ['Programada', 'Atendida', 'No asistió']
 const detailId = () => props.appointmentId || (route.params.id ? Number(route.params.id) : 0)
 
@@ -259,6 +299,34 @@ function startPatientEdit() {
 function scheduleNextAppointment() {
   showNextAppointmentPrompt.value = false
   showNextAppointment.value = true
+}
+
+function setRescheduleEndTime() {
+  if (!rescheduleForm.value.horaInicio) return
+  const hour = Number(rescheduleForm.value.horaInicio.slice(0, 2))
+  rescheduleForm.value.horaFin = `${String(Math.min(hour + 1, 14)).padStart(2, '0')}:00`
+}
+
+async function submitReschedule() {
+  if (!appointment.value) return
+  if (!rescheduleForm.value.fecha || !rescheduleForm.value.horaInicio || !rescheduleForm.value.horaFin) {
+    rescheduleError.value = 'Completa fecha y horario'
+    return
+  }
+  rescheduleLoading.value = true
+  rescheduleError.value = ''
+  try {
+    await appointmentsService.reschedule(detailId(), rescheduleForm.value)
+    success('Cita reprogramada correctamente')
+    showReschedule.value = false
+    const response = await appointmentsService.getById(detailId())
+    appointment.value = response.data
+  } catch (err: unknown) {
+    const e = err as { response?: { data?: { message?: string } } }
+    rescheduleError.value = e.response?.data?.message || 'No se pudo reprogramar la cita'
+  } finally {
+    rescheduleLoading.value = false
+  }
 }
 
 async function savePatient() {
@@ -299,10 +367,18 @@ async function savePatient() {
 
 async function changeStatus(estado: AppointmentStatus) {
   try {
-    await appointmentsService.changeStatus(Number(route.params.id), estado)
+    await appointmentsService.changeStatus(detailId(), estado)
     if (appointment.value) appointment.value.estado = estado
     success('Estado actualizado')
     if (estado === 'Atendida') showNextAppointmentPrompt.value = true
+    if (estado === 'No asistió') {
+      rescheduleForm.value = {
+        fecha: appointment.value?.fecha.substring(0, 10) || '',
+        horaInicio: appointment.value?.horaInicio.substring(11, 16) || '',
+        horaFin: appointment.value?.horaFin.substring(11, 16) || '',
+      }
+      showReschedulePrompt.value = true
+    }
   } catch { error('Error al cambiar estado') }
 }
 

@@ -265,6 +265,23 @@
         </div>
       </div>
     </FormModal>
+    <FormModal v-model="showReschedulePrompt">
+      <div class="rounded-[2rem] bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 p-5 sm:p-7">
+        <div class="rounded-[1.5rem] border border-rose-100 bg-white/80 p-5 text-center shadow-sm">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z"/><path stroke-linecap="round" d="M12 12v3l2 1"/></svg>
+          </div>
+          <h3 class="mt-4 text-lg font-semibold text-slate-900">Cita marcada como no asistida</h3>
+          <p class="mt-2 text-sm text-slate-600">
+            ¿Quieres reprogramar la cita de <strong>{{ reschedulePromptAppointment?.patient?.nombre }}</strong>?
+          </p>
+          <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
+            <button type="button" class="btn-secondary btn-sm" @click="showReschedulePrompt = false">Ahora no</button>
+            <button type="button" class="btn-primary btn-sm" @click="scheduleRescheduledAppointment">Reprogramar cita</button>
+          </div>
+        </div>
+      </div>
+    </FormModal>
   </div>
 </template>
 
@@ -292,6 +309,8 @@ const showAppointmentDetail = ref(false)
 const selectedAppointmentId = ref(0)
 const showNextAppointmentPrompt = ref(false)
 const nextAppointmentPatient = ref<Pick<Patient, 'id' | 'nombre'> | null>(null)
+const showReschedulePrompt = ref(false)
+const reschedulePromptAppointment = ref<Appointment | null>(null)
 const allAppointments = ref<Appointment[]>([])
 const loading = ref(true)
 const activeTab = ref('all')
@@ -475,6 +494,11 @@ function scheduleNextAppointment() {
   showNewAppointment.value = true
 }
 
+function scheduleRescheduledAppointment() {
+  if (reschedulePromptAppointment.value) openReschedule(reschedulePromptAppointment.value)
+  showReschedulePrompt.value = false
+}
+
 async function handleAppointmentSaved() {
   showNewAppointment.value = false
   await loadAppointments()
@@ -489,6 +513,9 @@ async function markAttendance(appointment: Appointment, status: 'Atendida' | 'No
     if (status === 'Atendida') {
       nextAppointmentPatient.value = appointment.patient || null
       showNextAppointmentPrompt.value = true
+    } else {
+      reschedulePromptAppointment.value = appointment
+      showReschedulePrompt.value = true
     }
   } catch (err: unknown) {
     const e = err as { response?: { data?: { message?: string } } }
