@@ -77,13 +77,14 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { patientsService } from '../../services/patients.service'
+import type { Patient } from '../../types'
 import { useNotification } from '../../composables/useNotification'
 
 const router = useRouter()
 const route = useRoute()
 const { success, error } = useNotification()
 const props = defineProps<{ modal?: boolean; patientId?: number }>()
-const emit = defineEmits<{ close: []; saved: [] }>()
+const emit = defineEmits<{ close: []; saved: [patient: Patient] }>()
 
 const editId = computed(() => props.patientId || (route.params.id ? Number(route.params.id) : 0))
 const isEdit = computed(() => editId.value > 0)
@@ -133,14 +134,15 @@ async function handleSubmit() {
   loading.value = true
   serverError.value = ''
   try {
+    let response
     if (isEdit.value) {
-      await patientsService.update(editId.value, form)
+      response = await patientsService.update(editId.value, form)
       success('Paciente actualizado correctamente')
     } else {
-      await patientsService.create(form)
+      response = await patientsService.create(form)
       success('Paciente registrado correctamente')
     }
-    if (props.modal) emit('saved')
+    if (props.modal) emit('saved', response.data)
     else router.push('/patients')
   } catch (err: unknown) {
     const e = err as { response?: { data?: { message?: string } } }

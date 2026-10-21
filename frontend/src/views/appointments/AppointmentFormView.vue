@@ -15,7 +15,17 @@
     <div class="card border-rose-100 bg-fuchsia-50/80 shadow-[0_10px_35px_-12px_rgba(225,29,72,0.2)]" :class="modal ? 'p-4 sm:p-5' : ''">
       <form @submit.prevent="handleSubmit" :class="modal ? 'space-y-4' : 'space-y-6'">
         <div>
-          <label class="label text-rose-900">Paciente</label>
+          <div class="mb-1 flex items-center justify-between gap-3">
+            <label class="label mb-0 text-rose-900">Paciente</label>
+            <button
+              v-if="!isEdit"
+              type="button"
+              class="text-xs font-semibold text-primary-600 transition hover:text-primary-800"
+              @click="showNewPatient = true"
+            >
+              + Nuevo paciente
+            </button>
+          </div>
           <div class="relative">
             <input
               v-model="patientSearch"
@@ -115,6 +125,9 @@
       </form>
     </div>
   </div>
+  <FormModal v-model="showNewPatient">
+    <PatientFormView modal @close="showNewPatient = false" @saved="handleNewPatientSaved" />
+  </FormModal>
 </template>
 
 <script setup lang="ts">
@@ -124,6 +137,8 @@ import { appointmentsService } from '../../services/appointments.service'
 import { patientsService } from '../../services/patients.service'
 import type { Patient, AppointmentStatus } from '../../types'
 import { useNotification } from '../../composables/useNotification'
+import FormModal from '../../components/FormModal.vue'
+import PatientFormView from '../patients/PatientFormView.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -138,6 +153,7 @@ const serverError = ref('')
 const patients = ref<Patient[]>([])
 const patientSearch = ref('')
 const showPatientResults = ref(false)
+const showNewPatient = ref(false)
 const startHours = Array.from({ length: 6 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
 const endHours = Array.from({ length: 7 }, (_, index) => `${String(index + 8).padStart(2, '0')}:00`)
 
@@ -230,6 +246,12 @@ function selectPatient(patient: Patient) {
   patientSearch.value = patient.nombre
   showPatientResults.value = false
   errors.patientId = ''
+}
+
+function handleNewPatientSaved(patient: Patient) {
+  patients.value = [patient, ...patients.value.filter((item) => item.id !== patient.id)]
+  selectPatient(patient)
+  showNewPatient.value = false
 }
 
 async function handleSubmit() {
