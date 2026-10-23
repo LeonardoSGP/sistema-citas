@@ -70,9 +70,12 @@ export const appointmentsService = {
 
   async getWeek() {
     const today = dateOnlyToUtc(getBusinessDateString());
-    const endOfWeek = addDays(today, 7);
+    const dayOfWeek = today.getUTCDay();
+    const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const startOfWeek = addDays(today, -daysSinceMonday);
+    const endOfWeek = addDays(startOfWeek, 7);
     return prisma.appointment.findMany({
-      where: { fecha: { gte: today, lt: endOfWeek } },
+      where: { fecha: { gte: startOfWeek, lt: endOfWeek } },
       include: { patient: { select: { id: true, nombre: true, expediente: true } } },
       orderBy: [{ fecha: 'asc' }, { horaInicio: 'asc' }],
     });
