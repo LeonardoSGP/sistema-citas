@@ -202,10 +202,34 @@ export const appointmentsService = {
   async reschedule(id: number, data: { fecha: string; horaInicio: string; horaFin: string }) {
     validateBusinessHours(data.horaInicio, data.horaFin);
 
-    // Check for conflicts
-    const conflict = await this.checkConflict(data.fecha, data.horaInicio, data.horaFin, id);
+    const existing = await prisma.appointment.findUnique({ where: { id } });
+    if (!existing) throw new Error('Cita no encontrada');
+
+    // Historical appointments remain as evidence; rescheduling creates a new appointment.
+    const preserveHistory = existing.estado !== 'Programada';
+    const conflict = await this.checkConflict(
+      data.fecha,
+      data.horaInicio,
+      data.horaFin,
+      preserveHistory ? undefined : id,
+    );
     if (conflict) {
       throw new Error('Ya existe una cita programada en ese horario. Por favor seleccione otro horario.');
+    }
+
+    if (preserveHistory) {
+      return prisma.appointment.create({
+        data: {
+          patientId: existing.patientId,
+          fecha: dateOnlyToUtc(data.fecha),
+          horaInicio: new Date(`1970-01-01T${data.horaInicio}:00.000Z`),
+          horaFin: new Date(`1970-01-01T${data.horaFin}:00.000Z`),
+          estado: 'Programada',
+          motivo: existing.motivo,
+          observaciones: existing.observaciones,
+        },
+        include: { patient: { select: { id: true, nombre: true, expediente: true } } },
+      });
     }
 
     return prisma.appointment.update({
