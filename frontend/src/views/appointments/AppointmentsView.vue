@@ -129,6 +129,9 @@
                     title="Reprogramar cita"
                     aria-label="Reprogramar cita"
                   ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z"/><path stroke-linecap="round" d="M12 12v3l2 1"/></svg></button>
+                  <button type="button" class="icon-action text-red-600 hover:bg-red-50 hover:text-red-700" title="Eliminar cita" aria-label="Eliminar cita" @click="openDeleteAppointment(appt)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7l1-3h4l1 3"/></svg>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -177,6 +180,9 @@
                 title="Reprogramar cita"
                 aria-label="Reprogramar cita"
               ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v4M17 3v4M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Z"/><path stroke-linecap="round" d="M12 12v3l2 1"/></svg></button>
+              <button type="button" class="icon-action text-red-600 hover:bg-red-50 hover:text-red-700" title="Eliminar cita" aria-label="Eliminar cita" @click="openDeleteAppointment(appt)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7l1-3h4l1 3"/></svg>
+              </button>
             </div>
           </div>
         </div>
@@ -282,6 +288,21 @@
         </div>
       </div>
     </FormModal>
+    <FormModal v-model="showDeletePrompt">
+      <div class="rounded-[2rem] bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 p-5 sm:p-7">
+        <div class="rounded-[1.5rem] border border-red-100 bg-white/80 p-5 text-center shadow-sm">
+          <h3 class="text-lg font-semibold text-slate-900">¿Eliminar esta cita?</h3>
+          <p class="mt-2 text-sm text-slate-600">Se eliminará la cita de <strong>{{ deleteAppointmentTarget?.patient?.nombre }}</strong>. Sus notas se conservarán.</p>
+          <p v-if="deleteError" class="mt-3 rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700">{{ deleteError }}</p>
+          <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
+            <button type="button" class="btn-secondary btn-sm" @click="showDeletePrompt = false">Cancelar</button>
+            <button type="button" class="btn-sm rounded-xl bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700 disabled:opacity-50" :disabled="deleteLoading" @click="deleteAppointment">
+              {{ deleteLoading ? 'Eliminando...' : 'Sí, eliminar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </FormModal>
   </div>
 </template>
 
@@ -311,6 +332,10 @@ const showNextAppointmentPrompt = ref(false)
 const nextAppointmentPatient = ref<Pick<Patient, 'id' | 'nombre'> | null>(null)
 const showReschedulePrompt = ref(false)
 const reschedulePromptAppointment = ref<Appointment | null>(null)
+const showDeletePrompt = ref(false)
+const deleteAppointmentTarget = ref<Appointment | null>(null)
+const deleteLoading = ref(false)
+const deleteError = ref('')
 const allAppointments = ref<Appointment[]>([])
 const loading = ref(true)
 const activeTab = ref('all')
@@ -504,6 +529,31 @@ function scheduleNextAppointment() {
 function scheduleRescheduledAppointment() {
   if (reschedulePromptAppointment.value) openReschedule(reschedulePromptAppointment.value)
   showReschedulePrompt.value = false
+}
+
+function openDeleteAppointment(appointment: Appointment) {
+  deleteAppointmentTarget.value = appointment
+  deleteError.value = ''
+  showDeletePrompt.value = true
+}
+
+async function deleteAppointment() {
+  if (!deleteAppointmentTarget.value) return
+  deleteLoading.value = true
+  deleteError.value = ''
+  try {
+    await appointmentsService.delete(deleteAppointmentTarget.value.id)
+    success('Cita eliminada correctamente')
+    showDeletePrompt.value = false
+    if (activeTab.value === 'today') await loadToday()
+    else if (activeTab.value === 'week') await loadWeek()
+    else await loadAppointments()
+  } catch (err: unknown) {
+    const e = err as { response?: { data?: { message?: string } } }
+    deleteError.value = e.response?.data?.message || 'No se pudo eliminar la cita'
+  } finally {
+    deleteLoading.value = false
+  }
 }
 
 async function handleAppointmentSaved() {

@@ -100,7 +100,11 @@ export const appointmentsController = {
       await appointmentsService.delete(Number(req.params.id));
       sendSuccess(res, null, 'Cita eliminada correctamente');
     } catch (error) {
-      sendError(res, (error as Error).message, 404);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        sendError(res, `No se pudo eliminar la cita: ${error.message}`, 409);
+        return;
+      }
+      sendError(res, (error as Error).message);
     }
   },
   async getStats(req: AuthRequest, res: Response): Promise<void> {

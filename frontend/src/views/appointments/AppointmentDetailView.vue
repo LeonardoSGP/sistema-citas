@@ -56,13 +56,13 @@
           </div>
         </div>
 
-        <div class="mt-4 flex gap-3">
+        <div class="mt-4 flex flex-wrap items-center gap-3">
           <button type="button" class="btn-secondary" @click="showEditAppointment = true">Editar cita</button>
           <button type="button" class="btn-primary" @click="showNewNote = true">+ Nota de sesión</button>
+          <button type="button" class="btn-secondary border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50 hover:text-red-700" @click="showDeletePrompt = true">
+            Eliminar cita
+          </button>
         </div>
-        <button type="button" class="mt-3 text-sm font-medium text-red-600 hover:text-red-800" @click="showDeletePrompt = true">
-          Eliminar cita
-        </button>
       </div>
 
       <!-- Session notes -->
