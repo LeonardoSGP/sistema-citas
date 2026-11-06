@@ -146,7 +146,7 @@ const { success, error } = useNotification()
 const props = defineProps<{ modal?: boolean; appointmentId?: number; initialPatientId?: number; initialDate?: string }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
 
-const editId = computed(() => props.appointmentId || (route.params.id ? Number(route.params.id) : 0))
+const editId = computed(() => props.appointmentId || (!props.modal && route.params.id ? Number(route.params.id) : 0))
 const isEdit = computed(() => editId.value > 0)
 const loading = ref(false)
 const serverError = ref('')
