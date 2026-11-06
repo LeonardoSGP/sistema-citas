@@ -220,7 +220,9 @@
         <p v-if="rescheduleError" class="mt-3 rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700">{{ rescheduleError }}</p>
         <div class="mt-4 flex justify-end gap-2">
           <button type="button" class="btn-secondary btn-sm" @click="showReschedule = false">Cancelar</button>
-          <button type="button" class="btn-primary btn-sm" :disabled="rescheduleLoading" @click="submitReschedule">{{ rescheduleLoading ? 'Guardando...' : 'Guardar' }}</button>
+          <button type="button" class="btn-primary btn-sm" :disabled="rescheduleLoading" @click="submitReschedule">
+            {{ rescheduleLoading ? 'Guardando...' : (appointment?.estado === 'Programada' ? 'Guardar cambios' : 'Crear nueva cita') }}
+          </button>
         </div>
       </div>
     </div>
@@ -340,11 +342,24 @@ async function submitReschedule() {
   rescheduleLoading.value = true
   rescheduleError.value = ''
   try {
-    await appointmentsService.reschedule(detailId(), rescheduleForm.value)
-    success('Cita reprogramada correctamente')
+    if (appointment.value.estado === 'Programada') {
+      await appointmentsService.reschedule(detailId(), rescheduleForm.value)
+      success('Cita reprogramada correctamente')
+    } else {
+      await appointmentsService.create({
+        patientId: appointment.value.patientId,
+        ...rescheduleForm.value,
+        estado: 'Programada',
+        motivo: appointment.value.motivo || undefined,
+        observaciones: appointment.value.observaciones || undefined,
+      })
+      success('Nueva cita programada correctamente')
+    }
     showReschedule.value = false
-    const response = await appointmentsService.getById(detailId())
-    appointment.value = response.data
+    if (appointment.value.estado === 'Programada') {
+      const response = await appointmentsService.getById(detailId())
+      appointment.value = response.data
+    }
   } catch (err: unknown) {
     const e = err as { response?: { data?: { message?: string } } }
     rescheduleError.value = e.response?.data?.message || 'No se pudo reprogramar la cita'
