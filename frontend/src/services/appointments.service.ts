@@ -54,6 +54,10 @@ export const appointmentsService = {
     const response = await api.patch<ApiResponse<Appointment>>(`/api/appointments/${id}/status`, { estado })
     return response.data
   },
+  async delete(id: number) {
+    const response = await api.delete<ApiResponse<null>>(`/api/appointments/${id}`)
+    return response.data
+  },
   async getStats(period: 'week' | 'month', referenceDate?: string) {
     const response = await api.get<ApiResponse<PatientStats>>('/api/appointments/stats', { params: { period, referenceDate } })
     return response.data

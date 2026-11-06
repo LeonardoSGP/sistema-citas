@@ -16,4 +16,5 @@ router.post('/', validate(createAppointmentSchema), appointmentsController.creat
 router.put('/:id', validate(updateAppointmentSchema), appointmentsController.update);
 router.patch('/:id/reschedule', appointmentsController.reschedule);
 router.patch('/:id/status', appointmentsController.changeStatus);
+router.delete('/:id', appointmentsController.delete);
 export default router;

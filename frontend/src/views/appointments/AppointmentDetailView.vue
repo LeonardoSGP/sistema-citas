@@ -60,6 +60,9 @@
           <button type="button" class="btn-secondary" @click="showEditAppointment = true">Editar cita</button>
           <button type="button" class="btn-primary" @click="showNewNote = true">+ Nota de sesión</button>
         </div>
+        <button type="button" class="mt-3 text-sm font-medium text-red-600 hover:text-red-800" @click="showDeletePrompt = true">
+          Eliminar cita
+        </button>
       </div>
 
       <!-- Session notes -->
@@ -222,6 +225,23 @@
       </div>
     </div>
   </FormModal>
+  <FormModal v-model="showDeletePrompt">
+    <div class="rounded-[2rem] bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 p-5 sm:p-7">
+      <div class="rounded-[1.5rem] border border-red-100 bg-white/80 p-5 text-center shadow-sm">
+        <h3 class="text-lg font-semibold text-slate-900">¿Eliminar esta cita?</h3>
+        <p class="mt-2 text-sm text-slate-600">
+          Se eliminará la cita de <strong>{{ appointment?.patient?.nombre }}</strong>. Sus notas de sesión se conservarán.
+        </p>
+        <p v-if="deleteError" class="mt-3 rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700">{{ deleteError }}</p>
+        <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
+          <button type="button" class="btn-secondary btn-sm" @click="showDeletePrompt = false">Cancelar</button>
+          <button type="button" class="btn-sm rounded-xl bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700 disabled:opacity-50" :disabled="deleteLoading" @click="deleteAppointment">
+            {{ deleteLoading ? 'Eliminando...' : 'Sí, eliminar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </FormModal>
   <FormModal v-model="showNextAppointment">
     <AppointmentFormView
       modal
@@ -253,6 +273,7 @@ const route = useRoute()
 const { formatDate, formatTime } = useFormatters()
 const { success, error } = useNotification()
 const props = defineProps<{ modal?: boolean; appointmentId?: number }>()
+const emit = defineEmits<{ deleted: [] }>()
 
 const appointment = ref<Appointment | null>(null)
 const loading = ref(true)
@@ -273,6 +294,9 @@ const showNextAppointmentPrompt = ref(false)
 const showNextAppointment = ref(false)
 const showReschedulePrompt = ref(false)
 const showReschedule = ref(false)
+const showDeletePrompt = ref(false)
+const deleteLoading = ref(false)
+const deleteError = ref('')
 const rescheduleLoading = ref(false)
 const rescheduleError = ref('')
 const rescheduleForm = ref({ fecha: '', horaInicio: '', horaFin: '' })
@@ -326,6 +350,24 @@ async function submitReschedule() {
     rescheduleError.value = e.response?.data?.message || 'No se pudo reprogramar la cita'
   } finally {
     rescheduleLoading.value = false
+  }
+}
+
+async function deleteAppointment() {
+  if (!appointment.value) return
+  deleteLoading.value = true
+  deleteError.value = ''
+  try {
+    await appointmentsService.delete(detailId())
+    success('Cita eliminada correctamente')
+    showDeletePrompt.value = false
+    if (props.modal) emit('deleted')
+    else await router.replace('/appointments')
+  } catch (err: unknown) {
+    const e = err as { response?: { data?: { message?: string } } }
+    deleteError.value = e.response?.data?.message || 'No se pudo eliminar la cita'
+  } finally {
+    deleteLoading.value = false
   }
 }
 

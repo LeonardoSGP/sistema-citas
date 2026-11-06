@@ -252,6 +252,19 @@ export const appointmentsService = {
     return prisma.appointment.update({ where: { id }, data: { estado } });
   },
 
+  async delete(id: number) {
+    const existing = await prisma.appointment.findUnique({ where: { id } });
+    if (!existing) throw new Error('Cita no encontrada');
+
+    await prisma.$transaction([
+      prisma.sessionNote.updateMany({
+        where: { appointmentId: id },
+        data: { appointmentId: null },
+      }),
+      prisma.appointment.delete({ where: { id } }),
+    ]);
+  },
+
   async getStats(period: 'week' | 'month', referenceDate?: string) {
     const selectedDateString = referenceDate || getBusinessDateString();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDateString)) throw new Error('Fecha de estadísticas inválida');

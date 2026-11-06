@@ -95,6 +95,14 @@ export const appointmentsController = {
       sendError(res, (error as Error).message);
     }
   },
+  async delete(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      await appointmentsService.delete(Number(req.params.id));
+      sendSuccess(res, null, 'Cita eliminada correctamente');
+    } catch (error) {
+      sendError(res, (error as Error).message, 404);
+    }
+  },
   async getStats(req: AuthRequest, res: Response): Promise<void> {
     try {
       const period = (req.query.period as string) || 'week';

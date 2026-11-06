@@ -246,7 +246,7 @@
       <AppointmentFormView modal :appointment-id="selectedAppointmentId" @close="showEditAppointment = false" @saved="handleAppointmentSaved" />
     </FormModal>
     <FormModal v-model="showAppointmentDetail" size="wide">
-      <AppointmentDetailView modal :appointment-id="selectedAppointmentId" />
+      <AppointmentDetailView modal :appointment-id="selectedAppointmentId" @deleted="handleAppointmentDeleted" />
     </FormModal>
     <FormModal v-model="showNextAppointmentPrompt">
       <div class="rounded-[2rem] bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 p-5 sm:p-7">
@@ -486,6 +486,13 @@ function openEditAppointment(id: number) {
 function openAppointmentDetail(id: number) {
   selectedAppointmentId.value = id
   showAppointmentDetail.value = true
+}
+
+async function handleAppointmentDeleted() {
+  showAppointmentDetail.value = false
+  if (activeTab.value === 'today') await loadToday()
+  else if (activeTab.value === 'week') await loadWeek()
+  else await loadAppointments()
 }
 
 function scheduleNextAppointment() {
